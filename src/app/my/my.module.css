@@ -1,0 +1,37 @@
+.shell { min-height: 100dvh; display: flex; justify-content: center; background: var(--color-neutral-300); }
+.app { width: 100%; max-width: 480px; min-height: 100dvh; background: var(--color-bg); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 2px solid var(--color-divider); position: sticky; top: 0; background: var(--color-bg); z-index: 5; }
+.hi { font-weight: 800; font-size: 18px; }
+.main { flex: 1; }
+.tabs { position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--color-divider); background: var(--color-bg); padding-bottom: env(safe-area-inset-bottom); }
+.tab { min-height: 56px; display: flex; align-items: center; padding: 0 16px; font-size: 13px; font-weight: 600; color: inherit; text-decoration: none; border-top: 3px solid transparent; margin-top: -2px; }
+.tab:hover { color: var(--color-accent-700); }
+.tabOn { background: var(--color-surface); color: var(--color-accent-700); border-top-color: var(--color-accent); }
+
+.pay { padding: 20px; display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--color-divider); background: var(--color-surface); }
+.payPaid { background: var(--color-bg); }
+.payOverdue { background: var(--color-accent-100); }
+.amountRow { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.amount { font-size: 48px; font-weight: 800; line-height: 1; }
+.payRows { margin-top: 12px; border-top: 1px solid var(--color-divider); }
+.payButtons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.payButtons > * { min-height: 44px; justify-content: flex-start; }
+.sent { display: flex; align-items: center; font-size: 13px; color: var(--color-neutral-700); }
+
+.section { padding: 20px; }
+.carPhoto { position: relative; height: 200px; background: var(--color-neutral-300); border-radius: 14px; overflow: hidden; display: grid; place-items: center; color: var(--color-neutral-600); }
+.carPhoto img { object-fit: cover; }
+.carHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 12px; }
+.carName { font-weight: 800; font-size: 20px; }
+.plate { font-weight: 800; font-size: 14px; border: 2px solid var(--color-text); padding: 2px 8px; letter-spacing: 0.06em; border-radius: 4px; }
+
+.hist { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-divider); }
+.histSub { font-size: 12px; color: var(--color-neutral-700); }
+.histRight { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+.contactButtons { display: flex; flex-direction: column; gap: 8px; }
+.contactButtons > * { min-height: 52px; font-size: 16px; justify-content: flex-start; gap: 10px; }
+
+.login { flex: 1; display: flex; flex-direction: column; padding: 28px 20px; gap: 20px; }
+.loginBrand { font-size: 30px; border-bottom: 2px solid var(--color-divider); padding-bottom: 12px; }
+.demo { font-size: 13px; background: var(--color-surface); border-radius: var(--radius-md); padding: 10px 12px; }
