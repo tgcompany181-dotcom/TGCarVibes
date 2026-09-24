@@ -9,7 +9,7 @@ import { getRepo } from '@/lib/data';
 import { DEMO_ADMIN } from '@/lib/data/demo';
 import { isISODate, todaySydney } from '@/lib/dates';
 import { toIntlPhone } from '@/lib/format';
-import { clearFailures, hashPin, recordFailure, safeEqual, SESSION_COOKIE, signSession, tooManyAttempts } from '@/lib/session';
+import { checkPin, clearFailures, hashPin, recordFailure, safeEqual, SESSION_COOKIE, signSession, tooManyAttempts } from '@/lib/session';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { randomInt } from 'node:crypto';
 import type { CarInput, CarStatus, Category } from '@/lib/types';
@@ -52,16 +52,18 @@ export async function adminLogin(_prev: AdminLoginState, form: FormData): Promis
     }
   } else {
     if (tooManyAttempts('admin', 10)) return { error: 'Too many attempts. Please wait 15 minutes.', email };
+    const stored = mode === 'local' ? await getRepo().getAdminAuth?.() : null;
     const ok =
       mode === 'local'
-        ? safeEqual(email.toLowerCase(), (process.env.ADMIN_EMAIL || 'admin').toLowerCase()) && safeEqual(password, process.env.ADMIN_PASSWORD!)
+        ? safeEqual(email.toLowerCase(), (process.env.ADMIN_EMAIL || 'admin').toLowerCase()) &&
+          (stored ? checkPin(password, stored.passwordHash) : safeEqual(password, process.env.ADMIN_PASSWORD!))
         : email === DEMO_ADMIN.email && password === DEMO_ADMIN.password;
     if (!ok) {
       recordFailure('admin');
       return { error: 'Wrong email or password.', email };
     }
     clearFailures('admin');
-    const s = signSession('admin');
+    const s = signSession(`admin:${stored?.epoch ?? 0}`);
     (await cookies()).set(SESSION_COOKIE, s.value, {
       httpOnly: true,
       sameSite: 'lax',
@@ -200,4 +202,38 @@ export async function resetCustomerPin(customerId: string): Promise<{ ok: true; 
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Something went wrong' };
   }
+}
+
+export type PasswordState = { ok: boolean; message: string } | null;
+
+/** Local mode: change the admin password from the website. Signs out every other session. */
+export async function changeAdminPassword(_prev: PasswordState, form: FormData): Promise<PasswordState> {
+  await requireAdmin();
+  const repo = getRepo();
+  if (dataMode() !== 'local' || !repo.setAdminPassword) return { ok: false, message: 'Not available in this setup.' };
+  const current = String(form.get('current') ?? '');
+  const next = String(form.get('next') ?? '');
+  const confirm = String(form.get('confirm') ?? '');
+  if (tooManyAttempts('admin-pw', 5)) return { ok: false, message: 'Too many attempts. Please wait 15 minutes.' };
+  const stored = await repo.getAdminAuth?.();
+  const currentOk = stored ? checkPin(current, stored.passwordHash) : safeEqual(current, process.env.ADMIN_PASSWORD!);
+  if (!currentOk) {
+    recordFailure('admin-pw');
+    return { ok: false, message: 'Current password is not right.' };
+  }
+  if (next.length < 8) return { ok: false, message: 'New password must be at least 8 characters.' };
+  if (next !== confirm) return { ok: false, message: 'The two new passwords do not match.' };
+  if (next === current) return { ok: false, message: 'Choose a password different from the current one.' };
+  const epoch = await repo.setAdminPassword(hashPin(next));
+  clearFailures('admin-pw');
+  // keep this browser signed in with the new session epoch
+  const s = signSession(`admin:${epoch}`);
+  (await cookies()).set(SESSION_COOKIE, s.value, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: s.maxAge,
+  });
+  return { ok: true, message: 'Password changed. Other devices have been signed out.' };
 }

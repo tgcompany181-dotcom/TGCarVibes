@@ -19,6 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: '/admin/customers', label: 'Customers', badge: String(customers) },
     { href: '/admin/payments', label: 'Payments', badge: overdue ? `${overdue} overdue` : '' },
     { href: '/admin/compliance', label: 'Compliance', badge: String(complianceItems(data.cars, today).length) },
+    { href: '/admin/settings', label: 'Settings', badge: '' },
   ];
   return (
     <ToastProvider>

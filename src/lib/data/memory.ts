@@ -7,6 +7,8 @@ import type { Repo } from './types';
 /** Everything the local/demo modes keep: the admin data plus hashed customer PINs. */
 export interface StoredData extends AdminData {
   pins: Record<string, string>;
+  /** Admin password set from the website (overrides ADMIN_PASSWORD). `epoch` invalidates old sessions. */
+  admin?: { passwordHash: string; epoch: number };
 }
 
 export interface MemoryStore {
@@ -173,6 +175,18 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       const d = await store.load();
       const c = d.customers.find((x) => x.phone === phone);
       return c ? { id: c.id, pinHash: d.pins[c.id] } : null;
+    },
+
+    async getAdminAuth() {
+      const a = (await store.load()).admin;
+      return a ? { ...a } : null;
+    },
+
+    async setAdminPassword(passwordHash) {
+      const d = await store.load();
+      d.admin = { passwordHash, epoch: (d.admin?.epoch ?? 0) + 1 };
+      await store.save();
+      return d.admin.epoch;
     },
 
     async setCustomerPin(customerId, pinHash) {

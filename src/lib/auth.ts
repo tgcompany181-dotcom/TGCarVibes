@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { isSupabaseConfigured } from './config';
+import { getRepo } from './data';
 import { SESSION_COOKIE, verifySession } from './session';
 import { createSupabaseServer } from './supabase/server';
 
@@ -12,7 +13,11 @@ export type Session = { role: 'admin' } | { role: 'customer'; customerId: string
 export const getSession = cache(async (): Promise<Session | null> => {
   if (!isSupabaseConfigured()) {
     const v = verifySession((await cookies()).get(SESSION_COOKIE)?.value);
-    if (v === 'admin') return { role: 'admin' };
+    if (v === 'admin' || v?.startsWith('admin:')) {
+      // sessions from before the last password change are rejected
+      const epoch = (await getRepo().getAdminAuth?.())?.epoch ?? 0;
+      return Number(v.split(':')[1] ?? 0) === epoch ? { role: 'admin' } : null;
+    }
     if (v?.startsWith('customer:')) return { role: 'customer', customerId: v.slice(9) };
     return null;
   }
