@@ -3,13 +3,15 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { DEMO_COOKIE, requireAdmin } from '@/lib/auth';
-import { CATEGORIES, isSupabaseConfigured } from '@/lib/config';
+import { requireAdmin } from '@/lib/auth';
+import { CATEGORIES, dataMode } from '@/lib/config';
 import { getRepo } from '@/lib/data';
 import { DEMO_ADMIN } from '@/lib/data/demo';
 import { isISODate, todaySydney } from '@/lib/dates';
 import { toIntlPhone } from '@/lib/format';
+import { clearFailures, hashPin, recordFailure, safeEqual, SESSION_COOKIE, signSession, tooManyAttempts } from '@/lib/session';
 import { createSupabaseServer } from '@/lib/supabase/server';
+import { randomInt } from 'node:crypto';
 import type { CarInput, CarStatus, Category } from '@/lib/types';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -33,21 +35,40 @@ async function run(fn: () => Promise<unknown>): Promise<ActionResult> {
 
 // ─── auth ──────────────────────────────────────────────────────────────────
 
-export async function adminLogin(_prev: string | null, form: FormData): Promise<string | null> {
+export type AdminLoginState = { error: string; email: string } | null;
+
+export async function adminLogin(_prev: AdminLoginState, form: FormData): Promise<AdminLoginState> {
   const email = String(form.get('email') ?? '').trim();
   const password = String(form.get('password') ?? '');
-  if (isSupabaseConfigured()) {
+  const mode = dataMode();
+  if (mode === 'supabase') {
     const sb = await createSupabaseServer();
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) return 'Wrong email or password.';
+    if (error) return { error: 'Wrong email or password.', email };
     const { data: admin } = await sb.from('admins').select('user_id').eq('user_id', data.user.id).maybeSingle();
     if (!admin) {
       await sb.auth.signOut();
-      return 'This account is not an admin.';
+      return { error: 'This account is not an admin.', email };
     }
   } else {
-    if (email !== DEMO_ADMIN.email || password !== DEMO_ADMIN.password) return 'Wrong email or password.';
-    (await cookies()).set(DEMO_COOKIE, 'admin', { httpOnly: true, sameSite: 'lax', path: '/' });
+    if (tooManyAttempts('admin', 10)) return { error: 'Too many attempts. Please wait 15 minutes.', email };
+    const ok =
+      mode === 'local'
+        ? safeEqual(email.toLowerCase(), (process.env.ADMIN_EMAIL || 'admin').toLowerCase()) && safeEqual(password, process.env.ADMIN_PASSWORD!)
+        : email === DEMO_ADMIN.email && password === DEMO_ADMIN.password;
+    if (!ok) {
+      recordFailure('admin');
+      return { error: 'Wrong email or password.', email };
+    }
+    clearFailures('admin');
+    const s = signSession('admin');
+    (await cookies()).set(SESSION_COOKIE, s.value, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: s.maxAge,
+    });
   }
   redirect('/admin');
 }
@@ -147,9 +168,36 @@ export async function addCustomer(form: FormData): Promise<ActionResult> {
   });
 }
 
+export async function updateCustomer(id: string, form: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const firstName = String(form.get('firstName') ?? '').trim();
+    const lastName = String(form.get('lastName') ?? '').trim();
+    const rawPhone = String(form.get('phone') ?? '').trim();
+    const phone = rawPhone ? toIntlPhone(rawPhone) : null;
+    if (!firstName) throw new Error('Enter the first name');
+    if (rawPhone && !phone) throw new Error('Enter a valid Australian mobile');
+    if (dataMode() === 'supabase' && !phone) throw new Error('Mobile is required');
+    await getRepo().updateCustomer(id, { firstName, lastName, phone, licenceNo: String(form.get('licenceNo') ?? '').trim() || null });
+  });
+}
+
 export async function endRental(rentalId: string, endDate: string): Promise<ActionResult> {
   return run(async () => {
     if (!isISODate(endDate)) throw new Error('Choose the return date');
     await getRepo().endRental(rentalId, endDate);
   });
+}
+
+/** Local/demo modes: create a new 6-digit PIN for a customer. Returned once so the owner can text it. */
+export async function resetCustomerPin(customerId: string): Promise<{ ok: true; pin: string } | { ok: false; error: string }> {
+  await requireAdmin();
+  const repo = getRepo();
+  if (!repo.setCustomerPin) return { ok: false, error: 'Customers sign in with an SMS code in this setup.' };
+  const pin = String(randomInt(0, 1_000_000)).padStart(6, '0');
+  try {
+    await repo.setCustomerPin(customerId, hashPin(pin));
+    return { ok: true, pin };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Something went wrong' };
+  }
 }

@@ -57,9 +57,9 @@ export default async function Overview() {
                 </div>
               </div>
               <b>{r.amountText}</b>
-              <a className="btn btn-secondary btn-sm" href={r.reminderHref} target="_blank" rel="noopener noreferrer">
+              {r.reminderHref && <a className="btn btn-secondary btn-sm" href={r.reminderHref} target="_blank" rel="noopener noreferrer">
                 Message
-              </a>
+              </a>}
               <ActionButton action={markPaid.bind(null, r.id)} success={`${r.name} marked paid`}>
                 Mark paid
               </ActionButton>

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { BUSINESS, isSupabaseConfigured } from '@/lib/config';
-import { demoRepo } from '@/lib/data/demo';
+import { getRepo } from '@/lib/data';
 import { generateInvoicesWith } from '@/lib/data/supabase';
 import { addDays, fmtShort, todaySydney } from '@/lib/dates';
 import { money } from '@/lib/format';
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const today = todaySydney();
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ mode: 'demo', created: await demoRepo.generateInvoices(today) });
+    return NextResponse.json({ mode: getRepo().mode, created: await getRepo().generateInvoices(today) });
   }
 
   const sb = createSupabaseService();

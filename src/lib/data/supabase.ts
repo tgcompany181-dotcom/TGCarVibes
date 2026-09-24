@@ -234,6 +234,16 @@ export const supabaseRepo: Repo = {
     check(await sb.from('cars').update({ status: 'available' }).eq('id', rental.car_id));
   },
 
+  async updateCustomer(id, input) {
+    const sb = await createSupabaseServer();
+    check(
+      await sb
+        .from('customers')
+        .update({ first_name: input.firstName, last_name: input.lastName, phone: input.phone, licence_no: input.licenceNo })
+        .eq('id', id),
+    );
+  },
+
   async generateInvoices(today) {
     return generateInvoicesWith(await createSupabaseServer(), today);
   },

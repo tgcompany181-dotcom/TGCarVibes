@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import { BUSINESS, isSupabaseConfigured, telHref } from '@/lib/config';
+import { BUSINESS, dataMode, telHref } from '@/lib/config';
 import { DEMO_CUSTOMER_PHONE, DEMO_OTP } from '@/lib/data/demo';
 import { displayPhone } from '@/lib/format';
 import { signOut } from '../actions';
@@ -13,7 +13,8 @@ export const metadata = { title: 'My rental — TG Car Vibes' };
 export default async function CustomerLogin() {
   const session = await getSession();
   if (session?.role === 'customer') redirect('/my');
-  const demo = !isSupabaseConfigured();
+  const mode = dataMode();
+  const demo = mode === 'demo';
 
   return (
     <div className={s.shell}>
@@ -32,7 +33,7 @@ export default async function CustomerLogin() {
           {session?.role === 'unlinked' ? (
             <>
               <div className="form-error">
-                We couldn’t find a rental for {displayPhone(session.phone)}. If you’ve just picked up a car, ask {BUSINESS.ownerName} to add
+                We couldn’t find a rental for {displayPhone(session.phone) || 'this number'}. If you’ve just picked up a car, ask {BUSINESS.ownerName} to add
                 this number.
               </div>
               <form action={signOut.bind(null, 'customer')}>
@@ -40,15 +41,15 @@ export default async function CustomerLogin() {
               </form>
             </>
           ) : (
-            <LoginForm />
+            <LoginForm usePin={mode !== 'supabase'} />
           )}
 
           <div className="muted" style={{ fontSize: 13 }}>
-            Trouble signing in? Call {BUSINESS.ownerName} on <a href={telHref}>{BUSINESS.ownerPhone}</a>.
+            No PIN yet, or forgot it? Call {BUSINESS.ownerName} on <a href={telHref}>{BUSINESS.ownerPhone}</a>.
           </div>
           {demo && (
             <div className={s.demo}>
-              <b>Demo mode.</b> Sign in with {DEMO_CUSTOMER_PHONE} and code {DEMO_OTP}.
+              <b>Demo mode.</b> Sign in with {DEMO_CUSTOMER_PHONE} and PIN {DEMO_OTP}.
             </div>
           )}
         </div>

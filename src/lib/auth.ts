@@ -3,16 +3,15 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { isSupabaseConfigured } from './config';
+import { SESSION_COOKIE, verifySession } from './session';
 import { createSupabaseServer } from './supabase/server';
 
 export type Session = { role: 'admin' } | { role: 'customer'; customerId: string } | { role: 'unlinked'; phone: string };
 
-export const DEMO_COOKIE = 'tg_demo_session';
-
 /** Who is signed in. Cached per request. */
 export const getSession = cache(async (): Promise<Session | null> => {
   if (!isSupabaseConfigured()) {
-    const v = (await cookies()).get(DEMO_COOKIE)?.value;
+    const v = verifySession((await cookies()).get(SESSION_COOKIE)?.value);
     if (v === 'admin') return { role: 'admin' };
     if (v?.startsWith('customer:')) return { role: 'customer', customerId: v.slice(9) };
     return null;

@@ -18,3 +18,13 @@ export const CATEGORIES = ['Hatch', 'Sedan', 'SUV', '7-seater', 'Van'] as const;
 
 export const isSupabaseConfigured = () =>
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+/**
+ * supabase — Supabase Postgres + Auth (phone OTP)
+ * local    — data kept in a JSON file on this server (DATA_DIR); admin password from ADMIN_PASSWORD,
+ *            customers sign in with mobile + PIN set by the admin
+ * demo     — in-memory dummy data, public demo logins
+ */
+export type DataMode = 'supabase' | 'local' | 'demo';
+export const dataMode = (): DataMode =>
+  isSupabaseConfigured() ? 'supabase' : process.env.ADMIN_PASSWORD ? 'local' : 'demo';

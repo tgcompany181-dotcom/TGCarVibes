@@ -36,8 +36,8 @@ export interface Customer {
   id: string;
   firstName: string;
   lastName: string;
-  /** International digits without "+", e.g. 61412558203 */
-  phone: string;
+  /** International digits without "+", e.g. 61412558203. Null if not on file. */
+  phone: string | null;
   licenceNo: string | null;
 }
 

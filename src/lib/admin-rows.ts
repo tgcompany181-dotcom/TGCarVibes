@@ -10,7 +10,7 @@ export interface InvoiceRow {
   dueText: string;
   name: string;
   firstName: string;
-  phone: string;
+  phone: string | null;
   plate: string;
   amount: number;
   amountText: string;
@@ -46,7 +46,7 @@ export function invoiceRows(data: AdminData, invoices: Invoice[], today: ISODate
         paidOn: i.paidOn,
         notified: i.customerNotified,
         lateText: late === 1 ? '1 day late' : `${late} days late`,
-        reminderHref: whatsappLink(
+        reminderHref: !customer.phone ? '' : whatsappLink(
           customer.phone,
           `Hi ${customer.firstName}, a reminder that your ${money(i.amount)} payment for ${plate} was due ${fmtShort(i.dueDate)}. PayID: ${BUSINESS.payId} (reference ${plate}). Thanks!`,
         ),

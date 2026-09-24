@@ -1,4 +1,5 @@
 import { getAdminData } from '@/lib/admin-data';
+import { dataMode } from '@/lib/config';
 import { fmtLong, fmtShort } from '@/lib/dates';
 import { currentInvoice, indexAdmin, invoiceStatus } from '@/lib/derive';
 import { displayPhone, money } from '@/lib/format';
@@ -15,7 +16,10 @@ export default async function CustomersPage() {
     const st = inv ? invoiceStatus(inv, today) : null;
     return {
       id: c.id,
-      name: `${c.firstName} ${c.lastName}`,
+      name: `${c.firstName} ${c.lastName}`.trim(),
+      firstName: c.firstName,
+      lastName: c.lastName,
+      licenceNo: c.licenceNo ?? '',
       phone: c.phone,
       phoneText: displayPhone(c.phone),
       rentalId: rental?.id ?? null,
@@ -34,5 +38,13 @@ export default async function CustomersPage() {
     .filter((c) => c.status === 'available' && !ix.activeRentalByCar.has(c.id))
     .map((c) => ({ id: c.id, label: `${c.plate ?? 'no plate'} · ${c.model} ${c.year}`, rate: c.weeklyRate }));
 
-  return <CustomersTable rows={rows} availableCars={availableCars} today={today} activeCount={ix.activeRentalByCustomer.size} />;
+  return (
+    <CustomersTable
+      rows={rows}
+      availableCars={availableCars}
+      today={today}
+      activeCount={ix.activeRentalByCustomer.size}
+      usePins={dataMode() !== 'supabase'}
+    />
+  );
 }

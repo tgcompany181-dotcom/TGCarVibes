@@ -12,7 +12,8 @@ export function toIntlPhone(input: string): string | null {
 }
 
 /** "61412558203" → "0412 558 203" */
-export function displayPhone(intl: string): string {
+export function displayPhone(intl: string | null): string {
+  if (!intl) return '';
   const local = intl.startsWith('61') ? '0' + intl.slice(2) : intl;
   return local.length === 10 ? `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}` : local;
 }

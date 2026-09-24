@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import { BUSINESS, isSupabaseConfigured } from '@/lib/config';
+import { BUSINESS, dataMode } from '@/lib/config';
 import { DEMO_ADMIN } from '@/lib/data/demo';
 import s from '../admin.module.css';
 import { AdminLoginForm } from './AdminLoginForm';
@@ -20,7 +20,7 @@ export default async function AdminLogin() {
           <div className={s.brandSub}>Admin</div>
         </div>
         <AdminLoginForm />
-        {!isSupabaseConfigured() && (
+        {dataMode() === 'demo' && (
           <div className="muted" style={{ fontSize: 13, background: 'var(--color-surface)', padding: '10px 12px', borderRadius: 12 }}>
             <b>Demo mode.</b> Email {DEMO_ADMIN.email}, password {DEMO_ADMIN.password}.
           </div>

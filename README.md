@@ -20,6 +20,16 @@ Open http://localhost:3000. With no Supabase variables set the app runs in **dem
 - Customer: `/my` → mobile `0412 558 203`, code `123456`
 - Admin: `/admin` → `admin@demo.local` / `demo`
 
+## Local mode (data on your own server)
+
+Set `ADMIN_PASSWORD` (and `SESSION_SECRET`, 16+ random characters) without the Supabase variables and the app keeps
+everything in `DATA_DIR/db.json` (default `./data`, git-ignored) with car photos in `DATA_DIR/photos`.
+
+- Admin signs in at `/admin` with username `ADMIN_EMAIL` (default `admin`) and `ADMIN_PASSWORD`.
+- Customers sign in at `/my` with their mobile + a 6-digit PIN. Create/reset a PIN in Admin → Customers → Edit
+  (shown once, with buttons to text it to the customer).
+- Back up `DATA_DIR` regularly — it is the whole database.
+
 ## Go live with Supabase
 
 1. Create a Supabase project. In the SQL editor run `supabase/migrations/0001_init.sql`, then `supabase/seed.sql` (the 11 current cars — no plates/dates; fill them in from Admin → Fleet → Edit).

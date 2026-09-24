@@ -71,7 +71,7 @@ export function PaymentsTable({ rows, initialFilter }: { rows: InvoiceRow[]; ini
                     </ActionButton>
                   ) : (
                     <>
-                      {p.status.cat === 'overdue' && (
+                      {p.status.cat === 'overdue' && p.reminderHref && (
                         <a className="btn btn-ghost btn-sm" href={p.reminderHref} target="_blank" rel="noopener noreferrer">
                           Message
                         </a>

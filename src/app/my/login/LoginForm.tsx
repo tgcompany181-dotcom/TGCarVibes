@@ -1,13 +1,19 @@
 'use client';
 
-import { useActionState } from 'react';
+import { startTransition, useActionState } from 'react';
 import { customerLogin, type LoginState } from '../actions';
 
-export function LoginForm() {
-  const [state, action, pending] = useActionState<LoginState, FormData>(customerLogin, { step: 'phone', phone: '' });
+export function LoginForm({ usePin }: { usePin: boolean }) {
+  const [state, action, pending] = useActionState<LoginState, FormData>(customerLogin, { step: usePin ? 'pin' : 'phone', phone: '' });
 
   return (
-    <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
+        startTransition(() => action(fd));
+      }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div className="field">
         <label htmlFor="phone">Mobile number</label>
         <input
@@ -23,6 +29,12 @@ export function LoginForm() {
           required
         />
       </div>
+      {state.step === 'pin' && (
+        <div className="field">
+          <label htmlFor="pin">PIN (from TG Car Vibes)</label>
+          <input id="pin" name="pin" className="input input-lg" type="password" inputMode="numeric" autoComplete="current-password" maxLength={8} required />
+        </div>
+      )}
       {state.step === 'code' && (
         <div className="field">
           <label htmlFor="code">6-digit code sent by SMS</label>
