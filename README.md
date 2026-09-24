@@ -31,6 +31,28 @@ Open http://localhost:3000. With no Supabase variables set the app runs in **dem
 
 Customers are added by the admin (Customers → **+ New hire**) with their mobile; that number is what they sign in with. Row-level security lets customers read only their own rental, car and invoices; the only thing they can write is “I’ve transferred” (via the `notify_paid` function). The public site reads the `public_cars` view, which exposes no plates, rego or odometer.
 
+## Deploy on your own VPS (Ubuntu + nginx + PM2)
+
+Needs Node.js 20+ and PM2 (`npm i -g pm2`). The app listens on port **3005** (change it in `ecosystem.config.cjs` if taken).
+
+```bash
+git clone https://github.com/tgcompany181-dotcom/TGCarVibes.git /var/www/tgcarvibes
+cd /var/www/tgcarvibes
+cp .env.example .env.local   # fill in Supabase etc. (empty = demo mode)
+./deploy/update.sh           # install, build, start with PM2
+pm2 startup                  # run the printed command once, so it restarts on reboot
+```
+
+nginx: copy `deploy/nginx-tgcarvibes.conf` to `/etc/nginx/sites-available/tgcarvibes`, set your domain, then
+`ln -s /etc/nginx/sites-available/tgcarvibes /etc/nginx/sites-enabled/ && nginx -t && systemctl reload nginx`
+and add HTTPS with `certbot --nginx -d your-domain`.
+
+Daily job (replaces Vercel Cron): `crontab -e` and add
+`0 8 * * * curl -fsS -H "Authorization: Bearer <CRON_SECRET>" http://127.0.0.1:3005/api/cron/daily > /dev/null`
+(the VPS clock may be UTC — adjust the hour to 8am Sydney).
+
+To update later: `cd /var/www/tgcarvibes && ./deploy/update.sh`.
+
 ## Business rules (from the handoff)
 
 - Minimum hire 8 weeks; bond = 2 weeks’ rent, refundable. All cars petrol, automatic.
