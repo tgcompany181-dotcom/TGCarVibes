@@ -93,11 +93,23 @@ export function ComplianceTable({ cars, services, today }: { cars: Car[]; servic
   );
 }
 
+/** Default gap between services. */
+const SERVICE_MONTHS = 4;
+
+function plusMonths(d: string, n: number): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return '';
+  const [y, m, day] = d.split('-').map(Number);
+  const last = new Date(Date.UTC(y, m - 1 + n + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m - 1 + n, Math.min(day, last))).toISOString().slice(0, 10);
+}
+
 function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRecord[]; onClose: () => void }) {
   const [error, setError] = useState('');
   const [pending, start] = useTransition();
   const [formKey, setFormKey] = useState(0);
   const flash = useToast();
+  const [date, setDate] = useState(todaySydney());
+  const [nextDate, setNextDate] = useState(plusMonths(todaySydney(), SERVICE_MONTHS));
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,6 +119,8 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
       if (!res.ok) return setError(res.error);
       setError('');
       setFormKey((k) => k + 1);
+      setDate(todaySydney());
+      setNextDate(plusMonths(todaySydney(), SERVICE_MONTHS));
       flash('Service saved');
     });
   };
@@ -121,7 +135,18 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
         <div className="form-grid">
           <div className="field">
             <label htmlFor="svc-date">Service date</label>
-            <input id="svc-date" name="date" type="date" className="input" defaultValue={todaySydney()} required />
+            <input
+              id="svc-date"
+              name="date"
+              type="date"
+              className="input"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                setNextDate(plusMonths(e.target.value, SERVICE_MONTHS));
+              }}
+              required
+            />
           </div>
           <div className="field">
             <label htmlFor="svc-odo">Odometer (km)</label>
@@ -145,8 +170,8 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
         </div>
         <div className="form-grid">
           <div className="field">
-            <label htmlFor="svc-next">Next service date</label>
-            <input id="svc-next" name="nextDate" type="date" className="input" />
+            <label htmlFor="svc-next">Next service date ({SERVICE_MONTHS} months, change if needed)</label>
+            <input id="svc-next" name="nextDate" type="date" className="input" value={nextDate} onChange={(e) => setNextDate(e.target.value)} />
           </div>
           <div className="field">
             <label htmlFor="svc-nextkm">Next service at (km)</label>
