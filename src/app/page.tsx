@@ -77,12 +77,21 @@ export default async function HomePage() {
 
       {announcement && (
         <>
-          <div className={s.announce}>
-            <div className={s.announceInner}>
-              <span>{announcement}</span>
-              <a href="#cars">Book now</a>
+          <a href="#cars" className={s.announce} aria-label={`${announcement} Book now`}>
+            <div className={s.marquee} aria-hidden>
+              {[0, 1].map((copy) => (
+                <div key={copy} className={s.marqueeTrack}>
+                  {[0, 1, 2].map((i) => (
+                    <span key={i} className={s.marqueeItem}>
+                      <span className={s.marqueeDot} />
+                      {announcement}
+                      <span className={s.marqueeCta}>Book now →</span>
+                    </span>
+                  ))}
+                </div>
+              ))}
             </div>
-          </div>
+          </a>
           <div className={s.redStrip} />
         </>
       )}

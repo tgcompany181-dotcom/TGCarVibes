@@ -9,11 +9,24 @@
 .nav a:hover { color: var(--color-accent-700); }
 .headerActions { display: flex; gap: 8px; }
 
-/* announcement */
-.announce { background: var(--color-text); color: var(--color-bg); }
-.announceInner { composes: wrap; padding-top: 10px; padding-bottom: 10px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 14px; text-align: center; }
-.announce a { color: var(--color-bg); font-weight: 800; }
-.redStrip { height: 6px; background: var(--color-accent); }
+/* announcement: scrolling ticker so visitors notice it straight away */
+.announce { display: block; background: var(--color-accent); color: #fff; text-decoration: none; overflow: hidden; }
+.announce:hover, .announce:focus-visible { color: #fff; }
+.marquee { display: flex; width: max-content; }
+.marqueeTrack { display: flex; flex: none; animation: marquee 28s linear infinite; }
+.announce:hover .marqueeTrack, .announce:focus-visible .marqueeTrack { animation-play-state: paused; }
+.marqueeItem { display: inline-flex; align-items: center; gap: 12px; padding: 12px 40px 12px 0; font-size: 17px; font-weight: 800; white-space: nowrap; letter-spacing: 0.01em; }
+.marqueeDot { width: 10px; height: 10px; border-radius: 50%; background: #fff; flex: none; animation: availPing2 1.4s ease-in-out infinite; }
+.marqueeCta { background: #fff; color: var(--color-accent-700); padding: 4px 12px; border-radius: 999px; font-size: 14px; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes availPing2 { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack, .marqueeDot { animation: none; }
+  .marquee { width: auto; justify-content: center; }
+  .marqueeTrack + .marqueeTrack, .marqueeItem + .marqueeItem { display: none; }
+}
+@media (max-width: 640px) { .marqueeItem { font-size: 15px; padding: 10px 28px 10px 0; } .marqueeTrack { animation-duration: 20s; } }
+.redStrip { height: 6px; background: var(--color-text); }
 
 /* hero */
 .hero { position: relative; width: 100%; aspect-ratio: 2056 / 765; min-height: 260px; background: var(--color-neutral-200); overflow: hidden; }
