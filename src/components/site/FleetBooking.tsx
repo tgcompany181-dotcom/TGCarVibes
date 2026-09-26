@@ -118,6 +118,7 @@ export function FleetBooking({ groups, defaultPick, webRequests }: { groups: Fle
                   ) : (
                     <CarIcon size={56} strokeWidth={1.5} aria-label="Photo coming soon" />
                   )}
+                  {!g.available && <span className={s.bookedStamp}>Booked out</span>}
                 </div>
                 <div className={s.cardBody}>
                   <div className={s.cardTop}>
@@ -128,7 +129,7 @@ export function FleetBooking({ groups, defaultPick, webRequests }: { groups: Fle
                         {g.available} available now
                       </span>
                     ) : (
-                      <span className={s.bookedOut}>Booked out</span>
+                      <span className={s.bookedOut}>On hire</span>
                     )}
                   </div>
                   <h3 className={s.cardTitle}>{g.title}</h3>

@@ -61,7 +61,7 @@
 .fleet { composes: wrap; padding-top: 64px; padding-bottom: 24px; scroll-margin-top: 16px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 24px; }
 .card { display: flex; flex-direction: column; background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
-.cardPhoto { position: relative; height: 220px; background: var(--color-neutral-300); display: grid; place-items: center; color: var(--color-neutral-600); }
+.cardPhoto { position: relative; overflow: hidden; height: 220px; background: var(--color-neutral-300); display: grid; place-items: center; color: var(--color-neutral-600); }
 .cardPhoto img { object-fit: cover; }
 .cardBody { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
 .cardTop { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -81,10 +81,14 @@
 .cardCta { min-height: 44px; }
 .emptyFleet { padding: 32px 0; color: var(--color-neutral-700); }
 
-/* booked-out models: faded and greyscale so available cars stand out */
-.cardBookedOut { opacity: 0.55; box-shadow: none; transition: opacity 0.2s ease; }
-.cardBookedOut .cardPhoto { filter: grayscale(1); }
-.cardBookedOut:hover, .cardBookedOut:focus-within { opacity: 0.85; }
+/* booked-out models: greyscale photo + red "BOOKED OUT" sticker; card itself stays at full strength */
+.cardBookedOut .cardPhoto > :not(.bookedStamp) { filter: grayscale(1); }
+.bookedStamp {
+  position: absolute; top: 30px; right: -54px; width: 210px; transform: rotate(35deg);
+  background: var(--color-danger); color: #fff; text-align: center; padding: 7px 0;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25); pointer-events: none;
+}
 
 /* muted tag + button for booked-out models */
 .bookedOut { display: inline-flex; font-size: 11px; padding: 3px 10px; border-radius: 9px; border: 1px solid var(--color-divider); color: var(--color-neutral-700); white-space: nowrap; }
