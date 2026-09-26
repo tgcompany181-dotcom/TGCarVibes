@@ -12,6 +12,7 @@ import type {
   NewCustomerInput,
   PublicCar,
   RequestStatus,
+  ServiceRecord,
 } from '../types';
 
 export interface Repo {
@@ -44,6 +45,10 @@ export interface Repo {
   getContractByToken?(token: string): Promise<Contract | null>;
   saveContract?(contract: Contract): Promise<void>;
   deleteContract?(id: string): Promise<void>;
+  listServices?(): Promise<ServiceRecord[]>;
+  /** Also moves the car's next-service date and odometer forward. */
+  addService?(input: Omit<ServiceRecord, 'id'>): Promise<void>;
+  deleteService?(id: string): Promise<void>;
   getBanners?(): Promise<string[]>;
   addBanner?(file: File): Promise<void>;
   setBanners?(urls: string[]): Promise<void>;

@@ -143,6 +143,41 @@ export async function saveCar(carId: string | null, form: FormData): Promise<Act
   });
 }
 
+// ─── service history ───────────────────────────────────────────────────────
+
+export async function addService(carId: string, form: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.addService) throw new Error('Not available in this setup.');
+    const date = optDate(form.get('date'));
+    const work = String(form.get('work') ?? '').trim().slice(0, 2000);
+    if (!date) throw new Error('Choose the service date');
+    if (!work) throw new Error('Write what was done');
+    const costRaw = String(form.get('cost') ?? '').replace(/[^\d.]/g, '');
+    const cost = costRaw ? Number(costRaw) : null;
+    if (cost != null && !Number.isFinite(cost)) throw new Error('Invalid cost');
+    const nextDate = optDate(form.get('nextDate'));
+    if (nextDate && nextDate <= date) throw new Error('Next service date must be after the service date');
+    await repo.addService({
+      carId,
+      date,
+      odometer: optInt(form.get('odometer')),
+      work,
+      cost,
+      nextDate,
+      nextKm: optInt(form.get('nextKm')),
+    });
+  });
+}
+
+export async function deleteService(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.deleteService) throw new Error('Not available in this setup.');
+    await repo.deleteService(id);
+  });
+}
+
 // ─── customers & rentals ───────────────────────────────────────────────────
 
 export async function addCustomer(form: FormData): Promise<ActionResult> {

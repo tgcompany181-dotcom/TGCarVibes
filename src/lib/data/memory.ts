@@ -1,7 +1,7 @@
 import 'server-only';
 import { todaySydney } from '../dates';
 import { missingInvoiceDates } from '../derive';
-import type { AdminData, BookingRequest, Car, Contract, Customer } from '../types';
+import type { AdminData, BookingRequest, Car, Contract, Customer, ServiceRecord } from '../types';
 import type { Repo } from './types';
 
 /** Everything the local/demo modes keep: the admin data plus hashed customer PINs. */
@@ -13,6 +13,7 @@ export interface StoredData extends AdminData {
   banners?: string[];
   requests?: BookingRequest[];
   contracts?: Contract[];
+  services?: ServiceRecord[];
 }
 
 export interface MemoryStore {
@@ -261,6 +262,26 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       if (!c) throw new Error('Contract not found');
       for (const f of [c.insuranceSignature, c.finalSignature, c.ownerSignature]) if (f) await store.deleteDocument(f);
       d.contracts = d.contracts!.filter((x) => x.id !== id);
+      await store.save();
+    },
+
+    async listServices() {
+      return clone((await store.load()).services ?? []);
+    },
+
+    async addService(input) {
+      const d = await store.load();
+      const car = d.cars.find((c) => c.id === input.carId);
+      if (!car) throw new Error('Car not found');
+      (d.services ??= []).unshift({ id: newId('s'), ...input });
+      if (input.nextDate) car.serviceDue = input.nextDate;
+      if (input.odometer != null && (car.odometer == null || input.odometer > car.odometer)) car.odometer = input.odometer;
+      await store.save();
+    },
+
+    async deleteService(id) {
+      const d = await store.load();
+      d.services = (d.services ?? []).filter((x) => x.id !== id);
       await store.save();
     },
 

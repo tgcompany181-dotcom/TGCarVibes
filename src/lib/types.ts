@@ -75,6 +75,19 @@ export interface CustomerData {
   invoices: Invoice[];
 }
 
+/** One entry in a car's service history (admin only). */
+export interface ServiceRecord {
+  id: string;
+  carId: string;
+  date: ISODate;
+  odometer: number | null;
+  work: string;
+  cost: number | null;
+  /** Where the car should next be serviced, by date and/or km. */
+  nextDate: ISODate | null;
+  nextKm: number | null;
+}
+
 export interface CarInput {
   model: string;
   year: number;
