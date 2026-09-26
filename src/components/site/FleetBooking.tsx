@@ -110,7 +110,7 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
                         {g.available} available now
                       </span>
                     ) : (
-                      <span className="tag tag-outline">Booked out</span>
+                      <span className={s.bookedOut}>Booked out</span>
                     )}
                   </div>
                   <h3 className={s.cardTitle}>{g.title}</h3>
@@ -134,7 +134,7 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
                       <div className={s.bondSub}>refundable</div>
                     </div>
                   </div>
-                  <button type="button" className={`btn btn-primary btn-block ${s.cardCta}`} onClick={() => setBooking(g)}>
+                  <button type="button" className={`btn btn-block ${s.cardCta} ${g.available ? 'btn-primary' : s.waitlistBtn}`} onClick={() => setBooking(g)}>
                     {g.available ? 'Book this car' : 'Join the waitlist'} <span aria-hidden>→</span>
                   </button>
                 </div>
