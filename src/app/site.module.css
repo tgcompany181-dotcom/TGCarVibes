@@ -81,6 +81,11 @@
 .cardCta { min-height: 44px; }
 .emptyFleet { padding: 32px 0; color: var(--color-neutral-700); }
 
+/* booked-out models: faded and greyscale so available cars stand out */
+.cardBookedOut { opacity: 0.55; box-shadow: none; transition: opacity 0.2s ease; }
+.cardBookedOut .cardPhoto { filter: grayscale(1); }
+.cardBookedOut:hover, .cardBookedOut:focus-within { opacity: 0.85; }
+
 /* muted tag + button for booked-out models */
 .bookedOut { display: inline-flex; font-size: 11px; padding: 3px 10px; border-radius: 9px; border: 1px solid var(--color-divider); color: var(--color-neutral-700); white-space: nowrap; }
 .waitlistBtn { background: transparent; color: var(--color-neutral-700); border: 1px solid var(--color-divider); font-weight: 600; }

@@ -45,7 +45,11 @@ export function FleetBooking({ groups, defaultPick, webRequests }: { groups: Fle
     if (isISODate(v) && (!isISODate(ret) || daysBetween(v, ret) < MIN_DAYS)) setRet(addDays(v, MIN_DAYS));
   };
 
-  const shown = useMemo(() => groups.filter((g) => cat === 'all' || g.category === cat), [groups, cat]);
+  // available models first, then the booked-out ones (stable within each group)
+  const shown = useMemo(
+    () => groups.filter((g) => cat === 'all' || g.category === cat).sort((a, b) => Number(b.available > 0) - Number(a.available > 0)),
+    [groups, cat],
+  );
 
   const waText = (g: FleetGroup) =>
     g.available
@@ -107,7 +111,7 @@ export function FleetBooking({ groups, defaultPick, webRequests }: { groups: Fle
         ) : (
           <div className={s.grid}>
             {shown.map((g) => (
-              <article key={g.key} className={s.card}>
+              <article key={g.key} className={`${s.card} ${g.available ? '' : s.cardBookedOut}`}>
                 <div className={s.cardPhoto}>
                   {g.photoUrl ? (
                     <Image src={g.photoUrl} alt={g.title} fill sizes="(max-width: 700px) 100vw, 400px" unoptimized={g.photoUrl.startsWith('data:')} />
