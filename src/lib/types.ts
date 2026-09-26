@@ -166,4 +166,9 @@ export interface Contract {
   finalSignature?: string;
   /** SHA-256 of the terms, details, renter info and signatures at signing time. */
   hash?: string;
+  /** Countersignature by TG Car Vibes after the renter has signed. */
+  ownerSignature?: string;
+  ownerName?: string;
+  ownerTitle?: string;
+  countersignedAt?: string;
 }

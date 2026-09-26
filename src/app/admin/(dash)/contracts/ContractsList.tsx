@@ -73,8 +73,10 @@ export function ContractsList({ contracts, hires, today, siteUrl }: { contracts:
                 </td>
                 <td>{money(c.details.weeklyRent)}/wk</td>
                 <td>
-                  {c.status === 'signed' ? (
-                    <Tag tone="neutral">Signed {c.signedAt ? when(c.signedAt) : ''}</Tag>
+                  {c.status === 'signed' && !c.countersignedAt ? (
+                    <Tag tone="accent">Signed by renter — countersign</Tag>
+                  ) : c.status === 'signed' ? (
+                    <Tag tone="neutral">Fully signed {c.countersignedAt ? when(c.countersignedAt) : ''}</Tag>
                   ) : c.status === 'sent' ? (
                     <Tag tone="outline">Waiting for signature</Tag>
                   ) : (
@@ -83,8 +85,8 @@ export function ContractsList({ contracts, hires, today, siteUrl }: { contracts:
                 </td>
                 <td className={`${s.right} ${s.nowrap}`}>
                   {c.status === 'signed' && (
-                    <Link className="btn btn-ghost btn-sm" href={`/admin/contracts/${c.id}`}>
-                      View
+                    <Link className={c.countersignedAt ? 'btn btn-ghost btn-sm' : 'btn btn-primary btn-sm'} href={`/admin/contracts/${c.id}`}>
+                      {c.countersignedAt ? 'View' : 'Countersign'}
                     </Link>
                   )}
                   {c.status === 'sent' && (

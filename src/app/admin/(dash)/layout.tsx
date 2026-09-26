@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data, today, requests, contracts } = await getAdminData();
-  const unsigned = contracts?.filter((c) => c.status === 'sent').length ?? 0;
+  const toCountersign = contracts?.filter((c) => c.status === 'signed' && !c.countersignedAt).length ?? 0;
   const newRequests = requests?.filter((r) => r.status === 'new').length ?? 0;
   const overdue = paymentTotals(data.invoices, today).overdueCount;
   const customers = new Set(activeRentals(data.rentals, today).map((r) => r.customerId)).size;
@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: '/admin/customers', label: 'Customers', badge: String(customers) },
     { href: '/admin/payments', label: 'Payments', badge: overdue ? `${overdue} overdue` : '' },
     { href: '/admin/compliance', label: 'Compliance', badge: String(complianceItems(data.cars, today).length) },
-    ...(contracts ? [{ href: '/admin/contracts', label: 'Contracts', badge: unsigned ? `${unsigned} unsigned` : '' }] : []),
+    ...(contracts ? [{ href: '/admin/contracts', label: 'Contracts', badge: toCountersign ? `${toCountersign} to sign` : '' }] : []),
     { href: '/admin/settings', label: 'Settings', badge: '' },
   ];
   return (

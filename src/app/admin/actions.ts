@@ -346,3 +346,23 @@ export async function cancelContract(id: string): Promise<ActionResult> {
     await repo.saveContract!({ ...c, status: 'cancelled' });
   });
 }
+
+/** TG Car Vibes countersigns an agreement the renter has already signed. */
+export async function countersignContract(id: string, form: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    const c = await repo.getContract?.(id);
+    if (!c || !repo.saveContract || !repo.saveDocument) throw new Error('Contract not found');
+    if (c.status !== 'signed') throw new Error('The renter has not signed yet.');
+    if (c.countersignedAt) throw new Error('Already countersigned.');
+    const name = String(form.get('ownerName') ?? '').trim().slice(0, 100);
+    const title = String(form.get('ownerTitle') ?? '').trim().slice(0, 100);
+    if (!name) throw new Error('Enter your name');
+    const sig = String(form.get('ownerSig') ?? '');
+    const prefix = 'data:image/png;base64,';
+    const buf = sig.startsWith(prefix) ? Buffer.from(sig.slice(prefix.length), 'base64') : null;
+    if (!buf || buf.length < 100 || buf.length > 400 * 1024 || buf.readUInt32BE(0) !== 0x89504e47) throw new Error('Please sign in the box');
+    const file = await repo.saveDocument(new File([new Uint8Array(buf)], 'signature.png', { type: 'image/png' }), 'png');
+    await repo.saveContract({ ...c, ownerSignature: file, ownerName: name, ownerTitle: title, countersignedAt: new Date().toISOString() });
+  });
+}

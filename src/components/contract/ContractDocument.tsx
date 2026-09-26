@@ -48,7 +48,7 @@ export function ContractDocument({
   insuranceSlot?: React.ReactNode;
   finalSlot?: React.ReactNode;
   /** Builds the URL of a stored signature image (signed copies only). */
-  signatureUrl?: (which: 'insurance' | 'final') => string;
+  signatureUrl?: (which: 'insurance' | 'final' | 'owner') => string;
 }) {
   const d = contract.details;
   const r = contract.renter;
@@ -108,7 +108,7 @@ export function ContractDocument({
       <p style={{ marginTop: 14 }}>
         This Agreement is between TG Car Vibes Pty Ltd (&quot;we&quot;, &quot;us&quot;, &quot;the Owner&quot;) and the Renter named above
         (&quot;you&quot;, &quot;the Renter&quot;). It is made up of the Agreement Details above, the terms and conditions below and the
-        Vehicle Pick-up and Return Report. By signing, you confirm that you have read and agree to all of them.
+        Vehicle Pick-up Report. By signing, you confirm that you have read and agree to all of them.
       </p>
 
       {CONTRACT_SECTIONS.map((sec) => (
@@ -130,6 +130,25 @@ export function ContractDocument({
       <h2 className={s.h1}>Declaration and signatures</h2>
       {signed ? signedBlock('final', FINAL_DECLARATION) : finalSlot}
 
+      <div className={s.label}>FOR TG CAR VIBES PTY LTD</div>
+      {contract.countersignedAt ? (
+        <div className={s.sigBox}>
+          {signatureUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className={s.sigImg} src={signatureUrl('owner')} alt={`Signature of ${contract.ownerName}`} />
+          )}
+          <div className={s.sigMeta}>
+            Signed electronically by <b>{contract.ownerName}</b>
+            {contract.ownerTitle ? `, ${contract.ownerTitle}` : ''} on{' '}
+            {new Date(contract.countersignedAt).toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })} (Sydney time)
+          </div>
+        </div>
+      ) : (
+        <div className={s.sigBox} style={{ color: '#5a5f68' }}>
+          {signed ? 'Awaiting countersignature by TG Car Vibes Pty Ltd.' : 'TG Car Vibes Pty Ltd will countersign after you have signed.'}
+        </div>
+      )}
+
       {signed && (
         <>
           <p style={{ marginTop: 16 }}>
@@ -142,22 +161,14 @@ export function ContractDocument({
       )}
 
       <section className={s.pageBreak}>
-        <h2 className={s.h1}>Vehicle pick-up and return report</h2>
-        <p>To be completed together by the Renter and TG Car Vibes Pty Ltd when the Vehicle is picked up and when it is returned.</p>
+        <h2 className={s.h1}>Vehicle pick-up report</h2>
+        <p>To be completed together by the Renter and TG Car Vibes Pty Ltd when the Vehicle is picked up.</p>
         <table className={s.table}>
-          <thead>
-            <tr>
-              <th />
-              <th>At pick-up</th>
-              <th>At return</th>
-            </tr>
-          </thead>
           <tbody>
-            {['Date and time', 'Odometer (km)', 'Fuel level', 'Existing damage / scratches', 'Tyres / lights / windscreen', 'Interior clean', 'Photos taken', 'Keys handed over / returned', 'Renter signature', 'For TG Car Vibes'].map((k) => (
+            {['Date and time', 'Odometer (km)', 'Fuel level', 'Existing damage / scratches', 'Tyres / lights / windscreen', 'Interior clean', 'Photos taken (Yes / No)', 'Keys handed over', 'Renter signature', 'For TG Car Vibes'].map((k) => (
               <tr key={k}>
                 <th scope="row">{k}</th>
-                <td style={{ height: 30 }} />
-                <td />
+                <td style={{ height: 34 }} />
               </tr>
             ))}
           </tbody>

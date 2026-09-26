@@ -1,7 +1,7 @@
 // Contract terms shown on the online signing page. Mirrors the Word agreement
 // (TG_Car_Vibes_Rental_Agreement_FIXED_TERM.docx). Change CONTRACT_VERSION whenever the wording changes.
 
-export const CONTRACT_VERSION = '2026-09-fixed-term-v1';
+export const CONTRACT_VERSION = '2026-09-fixed-term-v2';
 
 import type { ContractRenter } from './types';
 
@@ -617,7 +617,7 @@ export const CONTRACT_SECTIONS: Section[] = [
     "num": "8.3",
     "runs": [
      {
-      "text": "We will inspect the Vehicle with you at return and record its condition in the Vehicle Pick-up and Return Report.",
+      "text": "We will inspect the Vehicle with you at return, record its condition in writing with photos, and compare it with the Vehicle Pick-up Report.",
       "bold": false
      }
     ]

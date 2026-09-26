@@ -4,6 +4,7 @@ import { ContractDocument } from '@/components/contract/ContractDocument';
 import { PrintButton } from '@/components/contract/PrintButton';
 import { getAdminData } from '@/lib/admin-data';
 import { getRepo } from '@/lib/data';
+import { Countersign } from './Countersign';
 
 export default async function ContractView({ params }: { params: Promise<{ id: string }> }) {
   await getAdminData();
@@ -24,9 +25,10 @@ export default async function ContractView({ params }: { params: Promise<{ id: s
           Signed from IP {c.signerIp} · {c.signerAgent}
         </p>
       )}
+      {c.status === 'signed' && !c.countersignedAt && <Countersign id={c.id} />}
       <ContractDocument
         contract={c}
-        signatureUrl={(w) => `/admin/documents/${w === 'insurance' ? c.insuranceSignature : c.finalSignature}`}
+        signatureUrl={(w) => `/admin/documents/${w === 'insurance' ? c.insuranceSignature : w === 'owner' ? c.ownerSignature : c.finalSignature}`}
       />
     </>
   );
