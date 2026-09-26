@@ -337,6 +337,14 @@ export async function createContract(form: FormData): Promise<{ ok: true; token:
   return { ok: true, token };
 }
 
+export async function deleteContract(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.deleteContract) throw new Error('Not available in this setup.');
+    await repo.deleteContract(id);
+  });
+}
+
 export async function cancelContract(id: string): Promise<ActionResult> {
   return run(async () => {
     const repo = getRepo();

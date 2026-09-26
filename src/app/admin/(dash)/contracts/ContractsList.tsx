@@ -8,7 +8,7 @@ import { Tag } from '@/components/ui/Tag';
 import { useToast } from '@/components/ui/Toast';
 import { money, toIntlPhone, whatsappLink } from '@/lib/format';
 import type { Contract } from '@/lib/types';
-import { cancelContract, createContract } from '../../actions';
+import { cancelContract, createContract, deleteContract } from '../../actions';
 import s from '../../admin.module.css';
 
 export interface HireOption {
@@ -137,7 +137,19 @@ export function ContractsList({ contracts, hires, today, siteUrl }: { contracts:
                         Cancel
                       </ActionButton>
                     </>
-                  )}
+                  )}{' '}
+                  <ActionButton
+                    action={deleteContract.bind(null, c.id)}
+                    className="btn btn-ghost btn-sm"
+                    success="Contract deleted"
+                    confirmText={
+                      c.status === 'signed'
+                        ? `Delete the SIGNED contract for ${c.details.renterName} permanently? The signatures will be erased and this cannot be undone.`
+                        : `Delete this contract for ${c.details.renterName}? This cannot be undone.`
+                    }
+                  >
+                    Delete
+                  </ActionButton>
                 </td>
               </tr>
             ))}

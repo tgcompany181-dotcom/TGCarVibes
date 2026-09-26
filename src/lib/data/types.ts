@@ -43,6 +43,7 @@ export interface Repo {
   getContract?(id: string): Promise<Contract | null>;
   getContractByToken?(token: string): Promise<Contract | null>;
   saveContract?(contract: Contract): Promise<void>;
+  deleteContract?(id: string): Promise<void>;
   getBanners?(): Promise<string[]>;
   addBanner?(file: File): Promise<void>;
   setBanners?(urls: string[]): Promise<void>;

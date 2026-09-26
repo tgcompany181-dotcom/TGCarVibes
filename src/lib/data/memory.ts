@@ -255,6 +255,15 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       await store.save();
     },
 
+    async deleteContract(id) {
+      const d = await store.load();
+      const c = d.contracts?.find((x) => x.id === id);
+      if (!c) throw new Error('Contract not found');
+      for (const f of [c.insuranceSignature, c.finalSignature, c.ownerSignature]) if (f) await store.deleteDocument(f);
+      d.contracts = d.contracts!.filter((x) => x.id !== id);
+      await store.save();
+    },
+
     async getAdminAuth() {
       const a = (await store.load()).admin;
       return a ? { ...a } : null;
