@@ -85,7 +85,10 @@ export interface ServiceRecord {
   cost: number | null;
   /** Where the car should next be serviced, by date and/or km. */
   nextDate: ISODate | null;
+  /** Odometer reading at which the next service is due. */
   nextKm: number | null;
+  /** Things to do at the next service, e.g. "rear tyres". */
+  nextNote?: string;
 }
 
 export interface CarInput {

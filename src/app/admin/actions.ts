@@ -158,14 +158,19 @@ export async function addService(carId: string, form: FormData): Promise<ActionR
     if (cost != null && !Number.isFinite(cost)) throw new Error('Invalid cost');
     const nextDate = optDate(form.get('nextDate'));
     if (nextDate && nextDate <= date) throw new Error('Next service date must be after the service date');
+    const odometer = optInt(form.get('odometer'));
+    const every = optInt(form.get('nextKmIn'));
+    if (every != null && odometer == null) throw new Error('Enter the odometer so the next service km can be worked out');
+    const nextNote = String(form.get('nextNote') ?? '').trim().slice(0, 1000);
     await repo.addService({
       carId,
       date,
-      odometer: optInt(form.get('odometer')),
+      odometer,
       work,
       cost,
       nextDate,
-      nextKm: optInt(form.get('nextKm')),
+      nextKm: every != null && odometer != null ? odometer + every : null,
+      ...(nextNote ? { nextNote } : {}),
     });
   });
 }

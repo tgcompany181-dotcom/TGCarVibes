@@ -22,6 +22,16 @@ function kmTag(nextKm: number | null, odometer: number | null): { label: string;
   return { label: `at ${km(nextKm)}`, tone: 'neutral' };
 }
 
+/**
+ * The km the next service is due at. Early records may hold the gap ("5000")
+ * rather than the reading, so a value below the service odometer is treated as a gap.
+ */
+function nextKmOf(r: ServiceRecord | undefined): number | null {
+  if (!r || r.nextKm == null) return null;
+  if (r.odometer != null && r.nextKm <= r.odometer) return r.odometer + r.nextKm;
+  return r.nextKm;
+}
+
 export function ComplianceTable({ cars, services, today }: { cars: Car[]; services: ServiceRecord[] | null; today: ISODate }) {
   const [open, setOpen] = useState<Car | null>(null);
   const byCar = (id: string) => (services ?? []).filter((r) => r.carId === id).sort((a, b) => b.date.localeCompare(a.date));
@@ -46,9 +56,9 @@ export function ComplianceTable({ cars, services, today }: { cars: Car[]; servic
               const rego = dueDateTag(c.regoExpiry, today);
               const svc = dueDateTag(c.serviceDue, today, WARN_DAYS.Service);
               const last = byCar(c.id)[0];
-              const kt = kmTag(last?.nextKm ?? null, c.odometer);
+              const kt = kmTag(nextKmOf(last), c.odometer);
               return (
-                <tr key={c.id}>
+                <tr key={c.id} onClick={services ? () => setOpen(c) : undefined} style={services ? { cursor: 'pointer' } : undefined}>
                   <td className={s.plate}>{c.plate ?? '—'}</td>
                   <td>
                     {c.model} <span className="muted">{c.year}</span>
@@ -61,6 +71,11 @@ export function ComplianceTable({ cars, services, today }: { cars: Car[]; servic
                       {(c.serviceDue || !kt) && <Tag tone={svc.tone}>{svc.label}</Tag>}
                       {kt && <Tag tone={kt.tone}>{kt.label}</Tag>}
                     </div>
+                    {last?.nextNote && (
+                      <div className={s.itemSub} style={{ marginTop: 4, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={last.nextNote}>
+                        To do: {last.nextNote}
+                      </div>
+                    )}
                   </td>
                   <td style={{ maxWidth: 260 }}>
                     {last ? (
@@ -77,7 +92,7 @@ export function ComplianceTable({ cars, services, today }: { cars: Car[]; servic
                   <td className={s.nowrap}>{km(c.odometer)}</td>
                   {services && (
                     <td className={s.right}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setOpen(c)}>
+                      <button className="btn btn-ghost btn-sm" onClick={(e) => (e.stopPropagation(), setOpen(c))}>
                         Service log
                       </button>
                     </td>
@@ -110,6 +125,10 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
   const flash = useToast();
   const [date, setDate] = useState(todaySydney());
   const [nextDate, setNextDate] = useState(plusMonths(todaySydney(), SERVICE_MONTHS));
+  const [odo, setOdo] = useState(car.odometer != null ? String(car.odometer) : '');
+  const [every, setEvery] = useState('');
+  const digits = (v: string) => (v.replace(/[^\d]/g, '') ? Number(v.replace(/[^\d]/g, '')) : null);
+  const nextAt = digits(odo) != null && digits(every) != null ? digits(odo)! + digits(every)! : null;
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -121,6 +140,7 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
       setFormKey((k) => k + 1);
       setDate(todaySydney());
       setNextDate(plusMonths(todaySydney(), SERVICE_MONTHS));
+      setEvery('');
       flash('Service saved');
     });
   };
@@ -150,7 +170,7 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
           </div>
           <div className="field">
             <label htmlFor="svc-odo">Odometer (km)</label>
-            <input id="svc-odo" name="odometer" className="input" inputMode="numeric" defaultValue={car.odometer ?? ''} placeholder="182000" />
+            <input id="svc-odo" name="odometer" className="input" inputMode="numeric" value={odo} onChange={(e) => setOdo(e.target.value)} placeholder="182000" />
           </div>
           <div className="field">
             <label htmlFor="svc-cost">Cost ($)</label>
@@ -174,9 +194,23 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
             <input id="svc-next" name="nextDate" type="date" className="input" value={nextDate} onChange={(e) => setNextDate(e.target.value)} />
           </div>
           <div className="field">
-            <label htmlFor="svc-nextkm">Next service at (km)</label>
-            <input id="svc-nextkm" name="nextKm" className="input" inputMode="numeric" placeholder="e.g. 192000" />
+            <label htmlFor="svc-nextkm">Or after (km)</label>
+            <input
+              id="svc-nextkm"
+              name="nextKmIn"
+              className="input"
+              inputMode="numeric"
+              value={every}
+              onChange={(e) => setEvery(e.target.value)}
+              placeholder="e.g. 10000"
+            />
+            {nextAt != null && <div className={s.itemSub}>Next service at {km(nextAt)}</div>}
+            {nextAt == null && digits(every) != null && <div className="form-error">Enter the odometer above first</div>}
           </div>
+        </div>
+        <div className="field">
+          <label htmlFor="svc-nextnote">Notes for next service (optional)</label>
+          <input id="svc-nextnote" name="nextNote" className="input" placeholder="e.g. Replace rear tyres, check aircon" />
         </div>
         {error && (
           <div className="form-error" role="alert">
@@ -204,11 +238,12 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
               {r.odometer != null && <span className="muted"> · {km(r.odometer)}</span>}
               {r.cost != null && <span className="muted"> · {money(r.cost)}</span>}
               <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, margin: '2px 0' }}>{r.work}</div>
-              {(r.nextDate || r.nextKm != null) && (
+              {(r.nextDate || nextKmOf(r) != null) && (
                 <div className={s.itemSub}>
-                  Next: {[r.nextDate && fmtLong(r.nextDate), r.nextKm != null && km(r.nextKm)].filter(Boolean).join(' or ')}
+                  Next: {[r.nextDate && fmtLong(r.nextDate), nextKmOf(r) != null && km(nextKmOf(r))].filter(Boolean).join(' or ')}
                 </div>
               )}
+              {r.nextNote && <div className={s.itemSub}>To do next time: {r.nextNote}</div>}
             </div>
             <ActionButton action={deleteService.bind(null, r.id)} className="btn btn-ghost btn-sm" success="Service deleted" confirmText="Delete this service record?">
               Delete
