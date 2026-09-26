@@ -6,7 +6,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Tag } from '@/components/ui/Tag';
 import { useToast } from '@/components/ui/Toast';
 import { fmtLong, todaySydney } from '@/lib/dates';
-import { dueDateTag, type Tone } from '@/lib/derive';
+import { dueDateTag, WARN_DAYS, type Tone } from '@/lib/derive';
 import { km, money } from '@/lib/format';
 import type { Car, ISODate, ServiceRecord } from '@/lib/types';
 import { addService, deleteService } from '../../actions';
@@ -44,7 +44,7 @@ export function ComplianceTable({ cars, services, today }: { cars: Car[]; servic
           <tbody>
             {cars.map((c) => {
               const rego = dueDateTag(c.regoExpiry, today);
-              const svc = dueDateTag(c.serviceDue, today);
+              const svc = dueDateTag(c.serviceDue, today, WARN_DAYS.Service);
               const last = byCar(c.id)[0];
               const kt = kmTag(last?.nextKm ?? null, c.odometer);
               return (

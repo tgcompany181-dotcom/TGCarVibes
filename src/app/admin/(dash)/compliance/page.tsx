@@ -12,7 +12,7 @@ export default async function CompliancePage() {
     <>
       <h2 style={{ margin: '0 0 4px' }}>Rego &amp; servicing</h2>
       <div className="muted" style={{ fontSize: 14, marginBottom: 16 }}>
-        Sorted by what’s due first. Items within 30 days are highlighted. Click <b>Service log</b> to record a service and set the next one.
+        Sorted by what’s due first. Rego is highlighted 30 days before it expires, service 2 weeks before it’s due. Click <b>Service log</b> to record a service and set the next one.
       </div>
       <ComplianceTable cars={cars} services={services} today={today} />
     </>

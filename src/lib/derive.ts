@@ -20,11 +20,14 @@ export function invoiceStatus(inv: Invoice, today: ISODate): InvoiceStatus {
 }
 
 /** Tag for a compliance date (rego / service). */
-export function dueDateTag(d: ISODate | null, today: ISODate): { label: string; tone: Tone } {
+/** Days before a due date that it gets highlighted. */
+export const WARN_DAYS = { Rego: 30, Service: 14 } as const;
+
+export function dueDateTag(d: ISODate | null, today: ISODate, warnDays: number = WARN_DAYS.Rego): { label: string; tone: Tone } {
   if (!d) return { label: 'Not set', tone: 'neutral' };
   const n = daysBetween(today, d);
   if (n < 0) return { label: `Expired ${fmtShort(d)}`, tone: 'accent' };
-  if (n <= 30) return { label: `${fmtShort(d)} · ${n}d`, tone: 'outline' };
+  if (n <= warnDays) return { label: `${fmtShort(d)} · ${n}d`, tone: 'outline' };
   return { label: fmtLong(d), tone: 'neutral' };
 }
 
@@ -107,13 +110,13 @@ export interface ComplianceItem {
   car: Car;
 }
 
-export function complianceItems(cars: Car[], today: ISODate, withinDays = 30): ComplianceItem[] {
+export function complianceItems(cars: Car[], today: ISODate): ComplianceItem[] {
   const items: ComplianceItem[] = [];
   for (const car of cars) {
     for (const [kind, date] of [['Rego', car.regoExpiry], ['Service', car.serviceDue]] as const) {
       if (!date) continue;
       const days = daysBetween(today, date);
-      if (days <= withinDays) items.push({ kind, date, days, car });
+      if (days <= WARN_DAYS[kind]) items.push({ kind, date, days, car });
     }
   }
   return items.sort((a, b) => a.date.localeCompare(b.date));

@@ -23,7 +23,7 @@ export default async function Overview() {
     { label: 'In service', value: count('service'), sub: 'off the road' },
     { label: 'Collected ±7 days', value: money(pay.collected), sub: `of ${money(pay.expected)} expected` },
     { label: 'Overdue', value: money(pay.overdueAmount), sub: `${pay.overdueCount} payments`, red: pay.overdueCount > 0 },
-    { label: 'Compliance', value: comp.length, sub: 'items due ≤ 30 days' },
+    { label: 'Compliance', value: comp.length, sub: 'rego ≤ 30 days · service ≤ 14 days' },
   ];
 
   return (
@@ -74,7 +74,7 @@ export default async function Overview() {
         </section>
         <section>
           <div className={s.listHead}>
-            <h4>Due in the next 30 days</h4>
+            <h4>Rego &amp; service due soon</h4>
             <Link className="btn btn-ghost" href="/admin/compliance">
               Compliance
             </Link>
