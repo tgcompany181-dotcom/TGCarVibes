@@ -104,7 +104,14 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
                 <div className={s.cardBody}>
                   <div className={s.cardTop}>
                     <div className="kicker">{g.category}</div>
-                    <span className={`tag ${g.available ? 'tag-neutral' : 'tag-outline'}`}>{g.available ? `${g.available} available` : 'Booked out'}</span>
+                    {g.available ? (
+                      <span className={s.availBadge}>
+                        <span className={s.availDot} aria-hidden />
+                        {g.available} available now
+                      </span>
+                    ) : (
+                      <span className="tag tag-outline">Booked out</span>
+                    )}
                   </div>
                   <h3 className={s.cardTitle}>{g.title}</h3>
                   <div className={s.specs}>

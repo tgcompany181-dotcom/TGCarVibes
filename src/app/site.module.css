@@ -66,6 +66,28 @@
 .cardCta { min-height: 44px; }
 .emptyFleet { padding: 32px 0; color: var(--color-neutral-700); }
 
+/* "available now" badge: large, green, pulsing so it catches the eye */
+.availBadge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 12px; border-radius: 999px;
+  background: #e3f6ea; color: #0f6b33; border: 2px solid #1f9d55;
+  font-size: 15px; font-weight: 800; letter-spacing: 0.01em; white-space: nowrap;
+  animation: availBounce 2.4s ease-in-out infinite; transform-origin: center;
+}
+.availDot { position: relative; width: 10px; height: 10px; border-radius: 50%; background: #1f9d55; flex: none; }
+.availDot::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%; background: #1f9d55;
+  animation: availPing 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes availPing { 0% { transform: scale(1); opacity: 0.8; } 80%, 100% { transform: scale(2.8); opacity: 0; } }
+@keyframes availBounce {
+  0%, 70%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 157, 85, 0); }
+  80% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(31, 157, 85, 0.18); }
+  90% { transform: scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .availBadge, .availDot::after { animation: none; }
+}
+
 /* benefits */
 .benefits { composes: wrap; padding-top: 40px; padding-bottom: 40px; }
 .benefitGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); border-top: 2px solid var(--color-divider); border-bottom: 2px solid var(--color-divider); }
