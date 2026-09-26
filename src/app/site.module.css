@@ -148,6 +148,14 @@
 .footerBottom a { color: var(--color-neutral-300); text-decoration: none; }
 
 /* booking dialog */
+.dialogDates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lengthChips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lengthChips button {
+  font: inherit; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--color-divider); background: transparent; color: var(--color-text);
+}
+.lengthChips button:hover { border-color: var(--color-accent); color: var(--color-accent-700); }
+.lengthChips .chipOn, .lengthChips .chipOn:hover { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
 .dialogTitle { font-size: 26px; margin-top: -8px; }
 .dialogNote { font-size: 13px; color: var(--color-neutral-700); }
 .dialogActions { display: flex; flex-direction: column; gap: 8px; }

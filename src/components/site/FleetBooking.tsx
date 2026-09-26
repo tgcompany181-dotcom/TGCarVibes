@@ -12,6 +12,14 @@ import { money, plural } from '@/lib/format';
 
 const MIN_DAYS = BUSINESS.minWeeks * 7;
 
+/** Quick picks for the hire length (days from pick-up). */
+const LENGTHS: [string, number][] = [
+  ['8 weeks', 56],
+  ['3 months', 91],
+  ['6 months', 182],
+  ['12 months', 364],
+];
+
 export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; defaultPick: string }) {
   const [pick, setPick] = useState(defaultPick);
   const [ret, setRet] = useState(addDays(defaultPick, MIN_DAYS));
@@ -151,8 +159,29 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
             {booking.title}
           </div>
           <div className="rows">
-            <div className="row"><span>Pick-up</span><span>{valid ? fmtShort(pick) : '—'} · {BUSINESS.location}</span></div>
-            <div className="row"><span>Return</span><span>{valid ? fmtShort(ret) : '—'}</span></div>
+            <div className="row"><span>Pick-up location</span><span>{BUSINESS.location}</span></div>
+          </div>
+          <div className={s.dialogDates}>
+            <label className={s.cell}>
+              <span className={s.cellLabel}>Pick-up date</span>
+              <input type="date" className={s.cellValue} value={pick} min={defaultPick} onChange={(e) => onPick(e.target.value)} />
+            </label>
+            <label className={s.cell}>
+              <span className={s.cellLabel}>Return date</span>
+              <input type="date" className={s.cellValue} value={ret} min={isISODate(pick) ? addDays(pick, MIN_DAYS) : undefined} onChange={(e) => setRet(e.target.value)} />
+            </label>
+          </div>
+          <div className={s.lengthChips} role="group" aria-label="Hire length">
+            {LENGTHS.map(([label, days]) => {
+              const on = valid && nDays === days;
+              return (
+                <button key={label} type="button" className={on ? s.chipOn : undefined} aria-pressed={on} onClick={() => isISODate(pick) && setRet(addDays(pick, days))}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="rows">
             <div className="row"><span>Hire length</span><span className={tooShort ? s.bookingWarn : undefined}>{periodText}</span></div>
             <div className="row"><span>Weekly rate</span><span>{money(booking.weeklyRate)}</span></div>
             <div className="row"><span>Bond (2 weeks, refundable)</span><span>{money(booking.weeklyRate * BUSINESS.bondWeeks)}</span></div>
