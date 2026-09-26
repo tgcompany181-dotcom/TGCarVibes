@@ -6,6 +6,7 @@ import { BOOKING_QUESTIONS, DOCUMENT_KINDS, DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, 
 import { getRepo } from '@/lib/data';
 import { daysBetween, isISODate, todaySydney } from '@/lib/dates';
 import { toIntlPhone } from '@/lib/format';
+import { notifyNewRequest } from '@/lib/mailer';
 import { recordFailure, tooManyAttempts } from '@/lib/session';
 
 export type RequestResult = { ok: true } | { ok: false; error: string };
@@ -55,7 +56,7 @@ export async function submitBookingRequest(form: FormData): Promise<RequestResul
   const saved: { kind: string; label: string; file: string }[] = [];
   for (const d of docs) saved.push({ kind: d.kind, label: d.label, file: await repo.saveDocument(d.file, d.ext) });
 
-  await repo.addRequest({
+  const request = {
     car: clip(form.get('car'), 80),
     weeklyRate: Number(form.get('weeklyRate')) || 0,
     pickDate,
@@ -66,7 +67,17 @@ export async function submitBookingRequest(form: FormData): Promise<RequestResul
     message: clip(form.get('message'), 1000),
     waitlist: form.get('waitlist') === '1',
     documents: saved,
-  });
+  };
+  await repo.addRequest(request);
   revalidatePath('/admin', 'layout');
+
+  // email the owner; a mail problem must never lose the request
+  try {
+    const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'tgcarvibes.com';
+    const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
+    await notifyNewRequest(request, `${proto}://${host}`);
+  } catch (e) {
+    console.error('Could not send request email', e);
+  }
   return { ok: true };
 }

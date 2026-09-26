@@ -10,6 +10,7 @@ import { DEMO_ADMIN } from '@/lib/data/demo';
 import { isISODate, todaySydney } from '@/lib/dates';
 import { toIntlPhone } from '@/lib/format';
 import { checkPin, clearFailures, hashPin, recordFailure, safeEqual, SESSION_COOKIE, signSession, tooManyAttempts } from '@/lib/session';
+import { emailConfigured, sendMail } from '@/lib/mailer';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { randomInt } from 'node:crypto';
 import type { CarInput, CarStatus, Category } from '@/lib/types';
@@ -280,4 +281,20 @@ export async function deleteRequest(id: string): Promise<ActionResult> {
     if (!repo.deleteRequest) throw new Error('Not available in this setup.');
     await repo.deleteRequest(id);
   });
+}
+
+/** Settings → send a test email to check the email setup. */
+export async function sendTestEmail(): Promise<ActionResult> {
+  await requireAdmin();
+  if (!emailConfigured()) return { ok: false, error: 'Email is not set up on the server yet.' };
+  try {
+    await sendMail(
+      'TG Car Vibes — test email',
+      'Email notifications are working. You will get an email for every new booking request.',
+      '<p style="font-family:Arial,sans-serif">Email notifications are working ✅<br>You will get an email for every new booking request.</p>',
+    );
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: 'Sending failed: ' + (e instanceof Error ? e.message : String(e)) };
+  }
 }
