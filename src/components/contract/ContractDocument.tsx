@@ -107,8 +107,7 @@ export function ContractDocument({
       />
       <p style={{ marginTop: 14 }}>
         This Agreement is between TG Car Vibes Pty Ltd (&quot;we&quot;, &quot;us&quot;, &quot;the Owner&quot;) and the Renter named above
-        (&quot;you&quot;, &quot;the Renter&quot;). It is made up of the Agreement Details above, the terms and conditions below and the
-        Vehicle Pick-up Report. By signing, you confirm that you have read and agree to all of them.
+        (&quot;you&quot;, &quot;the Renter&quot;). It is made up of the Agreement Details above and the terms and conditions below. By signing, you confirm that you have read and agree to all of them.
       </p>
 
       {CONTRACT_SECTIONS.map((sec) => (
@@ -159,21 +158,6 @@ export function ContractDocument({
           </p>
         </>
       )}
-
-      <section className={s.pageBreak}>
-        <h2 className={s.h1}>Vehicle pick-up report</h2>
-        <p>To be completed together by the Renter and TG Car Vibes Pty Ltd when the Vehicle is picked up.</p>
-        <table className={s.table}>
-          <tbody>
-            {['Date and time', 'Odometer (km)', 'Fuel level', 'Existing damage / scratches', 'Tyres / lights / windscreen', 'Interior clean', 'Photos taken (Yes / No)', 'Keys handed over', 'Renter signature', 'For TG Car Vibes'].map((k) => (
-              <tr key={k}>
-                <th scope="row">{k}</th>
-                <td style={{ height: 34 }} />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
 
       <div className={s.footer}>TG Car Vibes Pty Ltd · ACN 685 536 798 · 0451 688 698</div>
     </article>
