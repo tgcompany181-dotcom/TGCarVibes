@@ -49,6 +49,7 @@ export interface Repo {
   /** Also moves the car's next-service date and odometer forward. */
   addService?(input: Omit<ServiceRecord, 'id'>): Promise<void>;
   deleteService?(id: string): Promise<void>;
+  updateService?(id: string, input: Omit<ServiceRecord, 'id' | 'carId'>): Promise<void>;
   getBanners?(): Promise<string[]>;
   addBanner?(file: File): Promise<void>;
   setBanners?(urls: string[]): Promise<void>;

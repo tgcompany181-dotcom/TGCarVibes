@@ -14,7 +14,7 @@ import { emailConfigured, sendMail } from '@/lib/mailer';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { randomBytes, randomInt } from 'node:crypto';
 import { CONTRACT_VERSION } from '@/lib/contract-terms';
-import type { CarInput, CarStatus, Category } from '@/lib/types';
+import type { CarInput, CarStatus, Category, ServiceRecord } from '@/lib/types';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -155,33 +155,44 @@ function kmField(v: FormDataEntryValue | null, label: string, max: number): numb
   return n;
 }
 
+function parseService(form: FormData): Omit<ServiceRecord, 'id' | 'carId'> {
+  const date = optDate(form.get('date'));
+  const work = String(form.get('work') ?? '').trim().slice(0, 2000);
+  if (!date) throw new Error('Choose the service date');
+  if (!work) throw new Error('Write what was done');
+  const costRaw = String(form.get('cost') ?? '').replace(/[^\d.]/g, '');
+  const cost = costRaw ? Number(costRaw) : null;
+  if (cost != null && !Number.isFinite(cost)) throw new Error('Invalid cost');
+  const nextDate = optDate(form.get('nextDate'));
+  if (nextDate && nextDate <= date) throw new Error('Next service date must be after the service date');
+  const odometer = kmField(form.get('odometer'), 'Odometer', 2_000_000);
+  const every = kmField(form.get('nextKmIn'), 'Next service km', 100_000);
+  if (every != null && odometer == null) throw new Error('Enter the odometer so the next service km can be worked out');
+  const nextNote = String(form.get('nextNote') ?? '').trim().slice(0, 1000);
+  return {
+    date,
+    odometer,
+    work,
+    cost,
+    nextDate,
+    nextKm: every != null && odometer != null ? odometer + every : null,
+    ...(nextNote ? { nextNote } : {}),
+  };
+}
+
 export async function addService(carId: string, form: FormData): Promise<ActionResult> {
   return run(async () => {
     const repo = getRepo();
     if (!repo.addService) throw new Error('Not available in this setup.');
-    const date = optDate(form.get('date'));
-    const work = String(form.get('work') ?? '').trim().slice(0, 2000);
-    if (!date) throw new Error('Choose the service date');
-    if (!work) throw new Error('Write what was done');
-    const costRaw = String(form.get('cost') ?? '').replace(/[^\d.]/g, '');
-    const cost = costRaw ? Number(costRaw) : null;
-    if (cost != null && !Number.isFinite(cost)) throw new Error('Invalid cost');
-    const nextDate = optDate(form.get('nextDate'));
-    if (nextDate && nextDate <= date) throw new Error('Next service date must be after the service date');
-    const odometer = kmField(form.get('odometer'), 'Odometer', 2_000_000);
-    const every = kmField(form.get('nextKmIn'), 'Next service km', 100_000);
-    if (every != null && odometer == null) throw new Error('Enter the odometer so the next service km can be worked out');
-    const nextNote = String(form.get('nextNote') ?? '').trim().slice(0, 1000);
-    await repo.addService({
-      carId,
-      date,
-      odometer,
-      work,
-      cost,
-      nextDate,
-      nextKm: every != null && odometer != null ? odometer + every : null,
-      ...(nextNote ? { nextNote } : {}),
-    });
+    await repo.addService({ carId, ...parseService(form) });
+  });
+}
+
+export async function updateService(id: string, form: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.updateService) throw new Error('Not available in this setup.');
+    await repo.updateService(id, parseService(form));
   });
 }
 

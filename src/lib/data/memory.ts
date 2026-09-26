@@ -279,6 +279,23 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       await store.save();
     },
 
+    async updateService(id, input) {
+      const d = await store.load();
+      const list = d.services ?? [];
+      const r = list.find((x) => x.id === id);
+      if (!r) throw new Error('Service record not found');
+      const car = d.cars.find((c) => c.id === r.carId);
+      const { nextNote, ...rest } = input;
+      Object.assign(r, rest);
+      if (nextNote) r.nextNote = nextNote;
+      else delete r.nextNote;
+      // Only the newest record decides the car's next-service date.
+      const newest = list.filter((x) => x.carId === r.carId).sort((a, b) => b.date.localeCompare(a.date))[0];
+      if (car && newest?.id === r.id && r.nextDate) car.serviceDue = r.nextDate;
+      if (car && r.odometer != null && (car.odometer == null || r.odometer > car.odometer)) car.odometer = r.odometer;
+      await store.save();
+    },
+
     async deleteService(id) {
       const d = await store.load();
       d.services = (d.services ?? []).filter((x) => x.id !== id);

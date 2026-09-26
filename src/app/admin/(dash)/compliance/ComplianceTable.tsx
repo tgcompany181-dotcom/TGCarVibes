@@ -9,7 +9,7 @@ import { fmtLong, todaySydney } from '@/lib/dates';
 import { dueDateTag, WARN_DAYS, type Tone } from '@/lib/derive';
 import { km, money } from '@/lib/format';
 import type { Car, ISODate, ServiceRecord } from '@/lib/types';
-import { addService, deleteService } from '../../actions';
+import { addService, deleteService, updateService } from '../../actions';
 import s from '../../admin.module.css';
 
 /** Km-based service reminder from the latest record, e.g. "or at 185,000 km". */
@@ -131,19 +131,38 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
   const [every, setEvery] = useState('');
   const digits = (v: string) => (v.replace(/[^\d]/g, '') ? Number(v.replace(/[^\d]/g, '')) : null);
   const nextAt = digits(odo) != null && digits(every) != null ? digits(odo)! + digits(every)! : null;
+  const [editing, setEditing] = useState<ServiceRecord | null>(null);
+
+  const reset = () => {
+    setEditing(null);
+    setError('');
+    setFormKey((k) => k + 1);
+    setDate(todaySydney());
+    setNextDate(plusMonths(todaySydney(), SERVICE_MONTHS));
+    setOdo(car.odometer != null ? String(car.odometer) : '');
+    setEvery('');
+  };
+
+  const startEdit = (r: ServiceRecord) => {
+    const at = nextKmOf(r);
+    setEditing(r);
+    setError('');
+    setFormKey((k) => k + 1);
+    setDate(r.date);
+    setNextDate(r.nextDate ?? '');
+    setOdo(r.odometer != null ? String(r.odometer) : '');
+    setEvery(at != null && r.odometer != null ? String(at - r.odometer) : '');
+    document.getElementById('svc-title')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     start(async () => {
-      const res = await addService(car.id, form);
+      const res = editing ? await updateService(editing.id, form) : await addService(car.id, form);
       if (!res.ok) return setError(res.error);
-      setError('');
-      setFormKey((k) => k + 1);
-      setDate(todaySydney());
-      setNextDate(plusMonths(todaySydney(), SERVICE_MONTHS));
-      setEvery('');
-      flash('Service saved');
+      flash(editing ? 'Service updated' : 'Service saved');
+      reset();
     });
   };
 
@@ -152,6 +171,11 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
       <div id="svc-title" className="dialog-title">
         Service log · {car.plate ?? ''} {car.model} {car.year}
       </div>
+      {editing && (
+        <div className="muted" style={{ marginBottom: 12, fontWeight: 600 }}>
+          Editing the service of {fmtLong(editing.date)}
+        </div>
+      )}
 
       <form key={formKey} onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div className="form-grid">
@@ -176,7 +200,7 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
           </div>
           <div className="field">
             <label htmlFor="svc-cost">Cost ($)</label>
-            <input id="svc-cost" name="cost" className="input" inputMode="decimal" placeholder="optional" />
+            <input id="svc-cost" name="cost" className="input" inputMode="decimal" placeholder="optional" defaultValue={editing?.cost ?? ''} />
           </div>
         </div>
         <div className="field">
@@ -187,6 +211,7 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
             className="input"
             rows={3}
             required
+            defaultValue={editing?.work ?? ''}
             placeholder="e.g. Oil + oil filter, 2 front tyres, brake pads front, wipers. Mechanic: ABC Auto Bankstown"
           />
         </div>
@@ -212,7 +237,7 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
         </div>
         <div className="field">
           <label htmlFor="svc-nextnote">Notes for next service (optional)</label>
-          <input id="svc-nextnote" name="nextNote" className="input" placeholder="e.g. Replace rear tyres, check aircon" />
+          <input id="svc-nextnote" name="nextNote" className="input" placeholder="e.g. Replace rear tyres, check aircon" defaultValue={editing?.nextNote ?? ''} />
         </div>
         {error && (
           <div className="form-error" role="alert">
@@ -220,11 +245,17 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
           </div>
         )}
         <div className="dialog-actions">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
+          {editing ? (
+            <button type="button" className="btn btn-secondary" onClick={reset}>
+              Cancel edit
+            </button>
+          ) : (
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Close
+            </button>
+          )}
           <button className="btn btn-primary" disabled={pending}>
-            {pending ? 'Saving…' : 'Save service'}
+            {pending ? 'Saving…' : editing ? 'Save changes' : 'Save service'}
           </button>
         </div>
       </form>
@@ -247,6 +278,9 @@ function ServiceDialog({ car, records, onClose }: { car: Car; records: ServiceRe
               )}
               {r.nextNote && <div className={s.itemSub}>To do next time: {r.nextNote}</div>}
             </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => startEdit(r)}>
+              Edit
+            </button>
             <ActionButton action={deleteService.bind(null, r.id)} className="btn btn-ghost btn-sm" success="Service deleted" confirmText="Delete this service record?">
               Delete
             </ActionButton>
