@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
 import { BUSINESS, dataMode } from '@/lib/config';
@@ -14,8 +15,8 @@ export default async function AdminLogin() {
     <div className={s.login}>
       <div className={s.loginCard}>
         <div>
-          <Link href="/" className={`logo ${s.brandLogo}`}>
-            {BUSINESS.name}
+          <Link href="/" aria-label="Home">
+            <BrandLogo height={36} />
           </Link>
           <div className={s.brandSub}>Admin</div>
         </div>

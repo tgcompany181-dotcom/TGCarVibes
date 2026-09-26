@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
 import { BUSINESS, dataMode, telHref } from '@/lib/config';
@@ -20,8 +21,8 @@ export default async function CustomerLogin() {
     <div className={s.shell}>
       <div className={s.app}>
         <div className={s.login}>
-          <Link href="/" className={`logo ${s.loginBrand}`}>
-            {BUSINESS.name}
+          <Link href="/" className={s.loginBrand} aria-label="Home">
+            <BrandLogo height={34} />
           </Link>
           <div style={{ marginTop: 24 }}>
             <h1 style={{ margin: '0 0 8px' }}>My rental</h1>

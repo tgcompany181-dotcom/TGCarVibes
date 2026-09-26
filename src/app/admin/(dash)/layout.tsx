@@ -1,3 +1,4 @@
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { ToastProvider } from '@/components/ui/Toast';
 import { getAdminData } from '@/lib/admin-data';
 import { BUSINESS } from '@/lib/config';
@@ -28,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className={s.shell}>
         <aside className={s.side}>
           <div className={s.brand}>
-            <div className={`logo ${s.brandLogo}`}>{BUSINESS.name}</div>
+            <BrandLogo height={26} />
             <div className={s.brandSub}>Admin</div>
           </div>
           <AdminNav tabs={tabs} />

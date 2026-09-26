@@ -2,6 +2,7 @@ import { Car, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FleetBooking } from '@/components/site/FleetBooking';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { HeroCarousel } from '@/components/site/HeroCarousel';
 import { BUSINESS, telHref, waHref } from '@/lib/config';
 import { getRepo } from '@/lib/data';
@@ -54,8 +55,8 @@ export default async function HomePage() {
     <div>
       <header className={s.header}>
         <div className={s.headerInner}>
-          <Link href="/" className={`logo ${s.headerLogo}`}>
-            {BUSINESS.name}
+          <Link href="/" className={s.headerLogo} aria-label="Home">
+            <BrandLogo height={44} priority />
           </Link>
           <nav className={s.nav} aria-label="Main">
             {NAV.map(([href, label]) => (
@@ -208,7 +209,9 @@ export default async function HomePage() {
       <footer className={s.footer}>
         <div className={s.footerInner}>
           <div className={s.footerTop}>
-            <div className={`logo ${s.footerLogo}`}>{BUSINESS.name}</div>
+            <div className={s.footerLogo}>
+              <BrandLogo height={36} onDark />
+            </div>
             <nav className={s.footerNav} aria-label="Footer">
               {NAV.map(([href, label]) => (
                 <a key={href} href={href}>
