@@ -29,6 +29,8 @@ function kmTag(nextKm: number | null, odometer: number | null): { label: string;
 function nextKmOf(r: ServiceRecord | undefined): number | null {
   if (!r || r.nextKm == null) return null;
   if (r.odometer != null && r.nextKm <= r.odometer) return r.odometer + r.nextKm;
+  // Ignore values mistyped with other text mixed in (e.g. 19,700,022,156,016 km).
+  if (r.nextKm > (r.odometer ?? 0) + 200_000) return null;
   return r.nextKm;
 }
 

@@ -145,6 +145,16 @@ export async function saveCar(carId: string | null, form: FormData): Promise<Act
 
 // ─── service history ───────────────────────────────────────────────────────
 
+/** A km number typed by hand: digits with optional commas/spaces/"km" only, never mixed with other text. */
+function kmField(v: FormDataEntryValue | null, label: string, max: number): number | null {
+  const s = String(v ?? '').trim().toLowerCase().replace(/km$/, '').trim();
+  if (!s) return null;
+  if (!/^[\d][\d,. ]*$/.test(s)) throw new Error(`${label}: numbers only (put notes in the notes box)`);
+  const n = Number(s.replace(/[,. ]/g, ''));
+  if (!(n > 0) || n > max) throw new Error(`${label}: ${n.toLocaleString('en-AU')} km doesn’t look right`);
+  return n;
+}
+
 export async function addService(carId: string, form: FormData): Promise<ActionResult> {
   return run(async () => {
     const repo = getRepo();
@@ -158,8 +168,8 @@ export async function addService(carId: string, form: FormData): Promise<ActionR
     if (cost != null && !Number.isFinite(cost)) throw new Error('Invalid cost');
     const nextDate = optDate(form.get('nextDate'));
     if (nextDate && nextDate <= date) throw new Error('Next service date must be after the service date');
-    const odometer = optInt(form.get('odometer'));
-    const every = optInt(form.get('nextKmIn'));
+    const odometer = kmField(form.get('odometer'), 'Odometer', 2_000_000);
+    const every = kmField(form.get('nextKmIn'), 'Next service km', 100_000);
     if (every != null && odometer == null) throw new Error('Enter the odometer so the next service km can be worked out');
     const nextNote = String(form.get('nextNote') ?? '').trim().slice(0, 1000);
     await repo.addService({
