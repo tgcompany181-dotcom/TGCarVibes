@@ -26,10 +26,32 @@ export interface HireOption {
 
 type Row = Contract & { customerPhone: string | null };
 
+type Filter = 'all' | 'waiting' | 'countersign' | 'done' | 'cancelled';
+const FILTERS: [Filter, string][] = [
+  ['all', 'All'],
+  ['waiting', 'Waiting'],
+  ['countersign', 'To countersign'],
+  ['done', 'Fully signed'],
+  ['cancelled', 'Cancelled'],
+];
+const stage = (c: Contract): Exclude<Filter, 'all'> =>
+  c.status === 'cancelled' ? 'cancelled' : c.status === 'sent' ? 'waiting' : c.countersignedAt ? 'done' : 'countersign';
+
 const when = (iso: string) => new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 export function ContractsList({ contracts, hires, today, siteUrl }: { contracts: Row[]; hires: HireOption[]; today: string; siteUrl: string }) {
   const [creating, setCreating] = useState(false);
+  const [q, setQ] = useState('');
+  const [f, setF] = useState<Filter>('all');
+  const needle = q.trim().toLowerCase();
+  const digits = needle.replace(/\D/g, '');
+  const shown = contracts.filter((c) => {
+    if (f !== 'all' && stage(c) !== f) return false;
+    if (!needle) return true;
+    const hay = [c.details.renterName, c.renter?.fullName, c.details.vehicleRego, c.details.vehicleDescription, c.renter?.email].filter(Boolean).join(' ').toLowerCase();
+    const phones = [c.details.mobile, c.renter?.mobile].filter(Boolean).join(' ').replace(/\D/g, '');
+    return hay.includes(needle) || (digits.length >= 3 && phones.includes(digits));
+  });
   const [sharing, setSharing] = useState<{ token: string; name: string; mobile: string; rego: string } | null>(null);
 
   return (
@@ -38,9 +60,23 @@ export function ContractsList({ contracts, hires, today, siteUrl }: { contracts:
         <h2>
           Contracts <span className={s.count}>{contracts.length}</span>
         </h2>
+        <input
+          className={`input ${s.search}`}
+          placeholder="Search name, plate or mobile"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Search contracts"
+        />
         <button className="btn btn-primary" onClick={() => setCreating(true)}>
           + New contract
         </button>
+      </div>
+      <div className="seg" style={{ marginBottom: 16 }}>
+        {FILTERS.map(([id, label]) => (
+          <button key={id} className={f === id ? 'on-accent' : undefined} aria-pressed={f === id} onClick={() => setF(id)}>
+            {label} · {id === 'all' ? contracts.length : contracts.filter((c) => stage(c) === id).length}
+          </button>
+        ))}
       </div>
       <div className="table-wrap">
         <table className="table">
@@ -55,14 +91,14 @@ export function ContractsList({ contracts, hires, today, siteUrl }: { contracts:
             </tr>
           </thead>
           <tbody>
-            {contracts.length === 0 && (
+            {shown.length === 0 && (
               <tr>
                 <td className="empty" colSpan={6}>
-                  No contracts yet. Click “+ New contract” to send one for online signing.
+                  {contracts.length === 0 ? 'No contracts yet. Click “+ New contract” to send one for online signing.' : 'No contracts match.'}
                 </td>
               </tr>
             )}
-            {contracts.map((c) => (
+            {shown.map((c) => (
               <tr key={c.id}>
                 <td style={{ fontWeight: 600 }}>{c.renter?.fullName || c.details.renterName}</td>
                 <td>
