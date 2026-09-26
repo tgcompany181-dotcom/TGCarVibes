@@ -168,7 +168,6 @@ export default async function HomePage() {
               ['Age', '21 or over'],
               ['Bond', '2 weeks’ rent, refunded on return'],
               ['Minimum hire', '8 weeks, no short-term rentals'],
-              ['Use', 'Private use only — not for Uber or rideshare'],
             ].map(([k, v]) => (
               <div key={k} className={s.needRow}>
                 <span>{k}</span>
