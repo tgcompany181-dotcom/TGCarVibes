@@ -1,7 +1,7 @@
 import 'server-only';
 import { todaySydney } from '../dates';
 import { missingInvoiceDates } from '../derive';
-import type { AdminData, BookingRequest, Car, Customer } from '../types';
+import type { AdminData, BookingRequest, Car, Contract, Customer } from '../types';
 import type { Repo } from './types';
 
 /** Everything the local/demo modes keep: the admin data plus hashed customer PINs. */
@@ -12,6 +12,7 @@ export interface StoredData extends AdminData {
   /** Home page cover images, in display order. */
   banners?: string[];
   requests?: BookingRequest[];
+  contracts?: Contract[];
 }
 
 export interface MemoryStore {
@@ -228,6 +229,29 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       const r = (await store.load()).requests?.find((x) => x.id === id);
       if (!r) throw new Error('Request not found');
       r.status = status;
+      await store.save();
+    },
+
+    async listContracts() {
+      return clone((await store.load()).contracts ?? []);
+    },
+
+    async getContractByToken(token) {
+      const c = (await store.load()).contracts?.find((x) => x.token === token);
+      return c ? clone(c) : null;
+    },
+
+    async getContract(id) {
+      const c = (await store.load()).contracts?.find((x) => x.id === id);
+      return c ? clone(c) : null;
+    },
+
+    async saveContract(contract) {
+      const d = await store.load();
+      const list = (d.contracts ??= []);
+      const i = list.findIndex((x) => x.id === contract.id);
+      if (i >= 0) list[i] = contract;
+      else list.unshift(contract);
       await store.save();
     },
 

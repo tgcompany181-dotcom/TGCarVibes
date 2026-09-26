@@ -3,6 +3,7 @@ import type {
   AdminData,
   CarInput,
   CarStatus,
+  Contract,
   BookingRequest,
   Customer,
   CustomerData,
@@ -38,6 +39,10 @@ export interface Repo {
   deleteRequest?(id: string): Promise<void>;
   saveDocument?(file: File, ext: string): Promise<string>;
   readDocument?(name: string): Promise<Buffer | null>;
+  listContracts?(): Promise<Contract[]>;
+  getContract?(id: string): Promise<Contract | null>;
+  getContractByToken?(token: string): Promise<Contract | null>;
+  saveContract?(contract: Contract): Promise<void>;
   getBanners?(): Promise<string[]>;
   addBanner?(file: File): Promise<void>;
   setBanners?(urls: string[]): Promise<void>;

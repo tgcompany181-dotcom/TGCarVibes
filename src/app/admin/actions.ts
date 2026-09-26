@@ -12,7 +12,8 @@ import { toIntlPhone } from '@/lib/format';
 import { checkPin, clearFailures, hashPin, recordFailure, safeEqual, SESSION_COOKIE, signSession, tooManyAttempts } from '@/lib/session';
 import { emailConfigured, sendMail } from '@/lib/mailer';
 import { createSupabaseServer } from '@/lib/supabase/server';
-import { randomInt } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
+import { CONTRACT_VERSION } from '@/lib/contract-terms';
 import type { CarInput, CarStatus, Category } from '@/lib/types';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -297,4 +298,51 @@ export async function sendTestEmail(): Promise<ActionResult> {
   } catch (e) {
     return { ok: false, error: 'Sending failed: ' + (e instanceof Error ? e.message : String(e)) };
   }
+}
+
+// ─── online contracts ──────────────────────────────────────────────────────
+
+export async function createContract(form: FormData): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  await requireAdmin();
+  const repo = getRepo();
+  if (!repo.saveContract) return { ok: false, error: 'Online contracts are not available in this setup.' };
+  const txt = (k: string, max = 200) => String(form.get(k) ?? '').trim().slice(0, max);
+  const details = {
+    renterName: txt('renterName'),
+    mobile: txt('mobile', 40),
+    vehicleRego: txt('vehicleRego', 20).toUpperCase(),
+    vehicleDescription: txt('vehicleDescription'),
+    fuelGrade: txt('fuelGrade', 40) || 'Petrol',
+    startDateTime: txt('startDateTime', 40),
+    endDateTime: txt('endDateTime', 40),
+    weeklyRent: Number(form.get('weeklyRent')) || 0,
+    paymentDay: txt('paymentDay', 40),
+    bond: Number(form.get('bond')) || 0,
+  };
+  if (!details.renterName) return { ok: false, error: 'Enter the renter name' };
+  if (!details.vehicleRego || !details.vehicleDescription) return { ok: false, error: 'Enter the vehicle details' };
+  if (!details.startDateTime || !details.endDateTime) return { ok: false, error: 'Enter the start and ending dates' };
+  if (!(details.weeklyRent > 0) || !(details.bond >= 0)) return { ok: false, error: 'Enter the weekly rent and bond' };
+  const token = randomBytes(24).toString('hex');
+  await repo.saveContract({
+    id: 'k' + randomBytes(6).toString('hex'),
+    token,
+    customerId: txt('customerId', 40) || null,
+    createdAt: new Date().toISOString(),
+    status: 'sent',
+    termsVersion: CONTRACT_VERSION,
+    details,
+  });
+  revalidatePath('/admin', 'layout');
+  return { ok: true, token };
+}
+
+export async function cancelContract(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    const c = await repo.getContract?.(id);
+    if (!c) throw new Error('Contract not found');
+    if (c.status === 'signed') throw new Error('A signed contract cannot be cancelled here.');
+    await repo.saveContract!({ ...c, status: 'cancelled' });
+  });
 }

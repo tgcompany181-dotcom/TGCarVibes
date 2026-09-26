@@ -122,3 +122,48 @@ export interface BookingRequest {
 }
 
 export type NewBookingRequest = Omit<BookingRequest, 'id' | 'createdAt' | 'status'>;
+
+/** Details filled in by the owner when creating a contract. */
+export interface ContractDetails {
+  renterName: string;
+  mobile: string;
+  vehicleRego: string;
+  vehicleDescription: string;
+  fuelGrade: string;
+  startDateTime: string; // e.g. "2026-10-01 10:00"
+  endDateTime: string;
+  weeklyRent: number;
+  paymentDay: string;
+  bond: number;
+}
+
+/** Details filled in by the renter on the signing page. */
+export interface ContractRenter {
+  fullName: string;
+  dateOfBirth: string;
+  licence: string; // no. / state / expiry
+  passport: string;
+  address: string;
+  mobile: string;
+  email: string;
+  emergencyContact: string;
+  otherDrivers: string;
+}
+
+export interface Contract {
+  id: string;
+  token: string; // secret for the signing link
+  customerId: string | null;
+  createdAt: string;
+  status: 'sent' | 'signed' | 'cancelled';
+  termsVersion: string;
+  details: ContractDetails;
+  renter?: ContractRenter;
+  signedAt?: string;
+  signerIp?: string;
+  signerAgent?: string;
+  insuranceSignature?: string; // private file names
+  finalSignature?: string;
+  /** SHA-256 of the terms, details, renter info and signatures at signing time. */
+  hash?: string;
+}

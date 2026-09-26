@@ -168,3 +168,7 @@ img { display: block; max-width: 100%; }
 @keyframes tgSway { 0% { transform: translateX(0); } 50% { transform: translateX(28px); } 100% { transform: translateX(0); } }
 .sway { animation: tgSway 3.2s ease-in-out infinite; will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .sway { animation: none; } }
+
+@media print {
+  .no-print { display: none !important; }
+}

@@ -65,3 +65,9 @@
 .docThumb img, .docPdf { width: 140px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-divider); background: var(--color-bg); }
 .docPdf { display: grid; place-items: center; font-weight: 800; color: var(--color-accent-700); }
 .docThumb:hover img { outline: 2px solid var(--color-accent); }
+
+@media print {
+  .side { display: none; }
+  .shell { display: block; }
+  .content { padding: 0; }
+}
