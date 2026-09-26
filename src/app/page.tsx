@@ -7,6 +7,7 @@ import { BUSINESS, telHref, waHref } from '@/lib/config';
 import { getRepo } from '@/lib/data';
 import { addDays, todaySydney } from '@/lib/dates';
 import { groupFleet } from '@/lib/derive';
+import { money } from '@/lib/format';
 import s from './site.module.css';
 
 export const revalidate = 60;
@@ -39,6 +40,16 @@ export default async function HomePage() {
   }
   const defaultPick = addDays(todaySydney(), 3);
 
+  // Top bar follows the fleet: shows what is available right now, hidden when nothing is.
+  const available = groups.filter((g) => g.available > 0).sort((a, b) => a.weeklyRate - b.weeklyRate);
+  const announcement =
+    available.length === 0
+      ? null
+      : available.length === 1
+        ? `${available[0].title} now available — ${money(available[0].weeklyRate)} per week, rego included. Minimum 8-week hire.`
+        : `${available.reduce((n, g) => n + g.available, 0)} cars available now from ${money(available[0].weeklyRate)} per week, rego included. Minimum 8-week hire.`;
+  const fromRate = groups.length ? Math.min(...groups.map((g) => g.weeklyRate)) : null;
+
   return (
     <div>
       <header className={s.header}>
@@ -64,13 +75,17 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <div className={s.announce}>
-        <div className={s.announceInner}>
-          <span>Honda Civic 2011 now available — $200 per week, rego included. Minimum 8-week hire.</span>
-          <a href="#cars">Book now</a>
-        </div>
-      </div>
-      <div className={s.redStrip} />
+      {announcement && (
+        <>
+          <div className={s.announce}>
+            <div className={s.announceInner}>
+              <span>{announcement}</span>
+              <a href="#cars">Book now</a>
+            </div>
+          </div>
+          <div className={s.redStrip} />
+        </>
+      )}
 
       <HeroCarousel images={banners.length ? banners : ['/images/hero-banner.jpg']} />
 
@@ -96,10 +111,10 @@ export default async function HomePage() {
       <section className={s.gallery}>
         <div className={s.sectionHead}>
           <div>
-            <div className="kicker">Honda Civic 2011 · $200 per week</div>
+            <div className="kicker">{fromRate != null ? `Petrol automatics · from ${money(fromRate)} per week` : 'Petrol automatics'}</div>
             <h2 className={s.h2}>Clean, ready, automatic</h2>
           </div>
-          <div className={s.galleryHeadNote}>Every car is cleaned and checked before pick-up. Touchscreen, auto gearbox, cloth seats.</div>
+          <div className={s.galleryHeadNote}>Every car is cleaned and checked before pick-up. Automatic gearbox, rego and servicing included.</div>
         </div>
         <div className={s.galleryGrid}>
           {GALLERY.map((p) => (
