@@ -1,23 +1,25 @@
 .wrap { max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
 
 /* header */
-.header { border-bottom: 2px solid var(--color-divider); }
+.header { background: var(--color-dark); color: var(--color-silver-light); border-bottom: 1px solid #2c2e33; }
 .headerInner { composes: wrap; padding-top: 14px; padding-bottom: 14px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .headerLogo { margin-right: auto; display: flex; align-items: center; }
 .nav { display: flex; gap: 20px; font-size: 14px; flex-wrap: wrap; }
-.nav a { color: inherit; text-decoration: none; }
-.nav a:hover { color: var(--color-accent-700); }
+.nav a { color: var(--color-silver); text-decoration: none; }
+.nav a:hover { color: var(--color-accent); }
+.header :global(.btn-secondary) { color: var(--color-silver-light); border-color: #5c6068; }
+.header :global(.btn-secondary):hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 .headerActions { display: flex; gap: 8px; }
 
 /* announcement: scrolling ticker so visitors notice it straight away */
-.announce { display: block; background: var(--color-text); color: var(--color-accent); text-decoration: none; overflow: hidden; }
-.announce:hover, .announce:focus-visible { color: var(--color-accent); }
+.announce { display: block; background: var(--gold-gradient); color: var(--color-on-accent); text-decoration: none; overflow: hidden; }
+.announce:hover, .announce:focus-visible { color: var(--color-on-accent); }
 .marquee { display: flex; width: max-content; }
 .marqueeTrack { display: flex; flex: none; animation: marquee 28s linear infinite; }
 .announce:hover .marqueeTrack, .announce:focus-visible .marqueeTrack { animation-play-state: paused; }
 .marqueeItem { display: inline-flex; align-items: center; gap: 12px; padding: 12px 40px 12px 0; font-size: 17px; font-weight: 800; white-space: nowrap; letter-spacing: 0.01em; }
-.marqueeDot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-accent); flex: none; animation: availPing2 1.4s ease-in-out infinite; }
-.marqueeCta { background: var(--color-accent); color: var(--color-on-accent); padding: 4px 12px; border-radius: 999px; font-size: 14px; }
+.marqueeDot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-dark); flex: none; animation: availPing2 1.4s ease-in-out infinite; }
+.marqueeCta { background: var(--color-dark); color: var(--color-accent); padding: 4px 12px; border-radius: 999px; font-size: 14px; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @keyframes availPing2 { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
 @media (prefers-reduced-motion: reduce) {
@@ -26,7 +28,7 @@
   .marqueeTrack + .marqueeTrack, .marqueeItem + .marqueeItem { display: none; }
 }
 @media (max-width: 640px) { .marqueeItem { font-size: 15px; padding: 10px 28px 10px 0; } .marqueeTrack { animation-duration: 20s; } }
-.redStrip { height: 4px; background: var(--color-accent); }
+.redStrip { height: 3px; background: var(--silver-gradient); }
 
 /* hero */
 .hero { position: relative; width: 100%; aspect-ratio: 2056 / 765; min-height: 260px; background: var(--color-neutral-200); overflow: hidden; }
@@ -126,8 +128,8 @@
 /* how it works */
 .how { composes: wrap; padding-top: 48px; padding-bottom: 56px; scroll-margin-top: 16px; }
 .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 24px; }
-.step { border-top: 2px solid var(--color-text); padding-top: 14px; }
-.stepNum { font-size: 56px; font-weight: 800; line-height: 1; color: var(--color-accent-700); }
+.step { border-top: 2px solid var(--color-silver); padding-top: 14px; }
+.stepNum { font-size: 56px; font-weight: 800; line-height: 1; color: var(--color-accent-700); background: var(--gold-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .step b { display: block; font-weight: 800; font-size: 18px; margin: 12px 0 4px; }
 .step p { font-size: 14px; color: var(--color-neutral-700); margin: 0; }
 
@@ -143,22 +145,23 @@
 .cta { background: transparent; border: 2px solid var(--color-divider); border-radius: 28px; padding: 44px 40px; display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
 .ctaLeft { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; min-width: 0; }
 .ctaIcon { width: 88px; height: 88px; border-radius: 50%; background: var(--color-accent-100); color: var(--color-accent-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ctaTitle { margin: 0; font-family: var(--font-script); font-weight: 400; font-size: clamp(40px, 5.5vw, 60px); line-height: 1.1; color: var(--color-accent-700); letter-spacing: 0; }
+.ctaTitle { margin: 0; font-family: var(--font-script); font-weight: 400; font-size: clamp(40px, 5.5vw, 60px); line-height: 1.15; color: var(--color-accent-700); background: var(--gold-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; padding-right: 8px; letter-spacing: 0; }
 .ctaSub { display: flex; align-items: center; gap: 8px; font-size: 17px; color: var(--color-neutral-800); }
 .ctaSub svg { color: var(--color-accent-700); flex: none; }
 .ctaButtons { display: flex; gap: 10px; flex-wrap: wrap; }
 .ctaButtons :global(.btn-secondary) { border-width: 2px; }
 
 /* footer */
-.footer { background: var(--color-text); color: var(--color-neutral-300); border-radius: 28px 28px 0 0; }
+.footer { background: var(--color-dark); color: var(--color-silver); border-radius: 28px 28px 0 0; border-top: 3px solid var(--color-accent); }
 .footerInner { composes: wrap; padding-top: 40px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 24px; }
 .footerTop { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
 .footerLogo { display: flex; }
 .footerNav { display: flex; gap: 24px; flex-wrap: wrap; font-size: 15px; }
-.footerNav a { color: var(--color-bg); text-decoration: none; }
-.footerRule { height: 1px; background: var(--color-neutral-700); }
+.footerNav a { color: var(--color-silver-light); text-decoration: none; }
+.footerNav a:hover { color: var(--color-accent); }
+.footerRule { height: 1px; background: #34373d; }
 .footerBottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px; }
-.footerBottom a { color: var(--color-neutral-300); text-decoration: none; }
+.footerBottom a { color: var(--color-silver); text-decoration: none; }
 
 /* booking dialog */
 .dialogDates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -168,7 +171,7 @@
   border: 1px solid var(--color-divider); background: transparent; color: var(--color-text);
 }
 .lengthChips button:hover { border-color: var(--color-accent); color: var(--color-accent-700); }
-.lengthChips .chipOn, .lengthChips .chipOn:hover { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.lengthChips .chipOn, .lengthChips .chipOn:hover { background: var(--gold-gradient); border-color: var(--color-accent); color: var(--color-on-accent); }
 .dialogTitle { font-size: 26px; margin-top: -8px; }
 .dialogNote { font-size: 13px; color: var(--color-neutral-700); }
 .dialogActions { display: flex; flex-direction: column; gap: 8px; }
@@ -206,7 +209,7 @@
 .choiceRow input { accent-color: var(--color-accent); width: 18px; height: 18px; margin: 0; }
 .choiceRow .choiceOn { border: 2px solid var(--color-accent); background: var(--color-accent-100); }
 .sentBox { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 8px 0; }
-.sentTick { width: 56px; height: 56px; border-radius: 50%; background: var(--color-accent); color: var(--color-on-accent); display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+.sentTick { width: 56px; height: 56px; border-radius: 50%; background: var(--gold-gradient); color: var(--color-on-accent); display: grid; place-items: center; font-size: 30px; font-weight: 800; }
 
 .docList { display: flex; flex-direction: column; gap: 8px; }
 .docSlot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px dashed var(--color-divider); border-radius: var(--radius-md); background: var(--color-bg); }

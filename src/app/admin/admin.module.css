@@ -57,7 +57,7 @@
 .requestTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .requestActions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
 
-.newRequestsBanner { display: block; margin-bottom: 20px; padding: 14px 18px; border-radius: var(--radius-md); background: var(--color-accent); color: var(--color-on-accent); text-decoration: none; font-size: 15px; }
+.newRequestsBanner { display: block; margin-bottom: 20px; padding: 14px 18px; border-radius: var(--radius-md); background: var(--gold-gradient); color: var(--color-on-accent); text-decoration: none; font-size: 15px; }
 .newRequestsBanner:hover { background: var(--color-accent-600); color: var(--color-on-accent); }
 
 .docs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }

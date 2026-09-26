@@ -210,7 +210,7 @@ export default async function HomePage() {
         <div className={s.footerInner}>
           <div className={s.footerTop}>
             <div className={s.footerLogo}>
-              <BrandLogo height={36} onDark />
+              <BrandLogo height={40} />
             </div>
             <nav className={s.footerNav} aria-label="Footer">
               {NAV.map(([href, label]) => (

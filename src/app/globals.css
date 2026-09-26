@@ -1,26 +1,32 @@
-/* TG Car Vibes — design tokens (from the "Modernist" design system) + component classes. */
+/* TG Car Vibes — design tokens + component classes. */
 
 :root {
-  --color-bg: #f3f2f2;
-  --color-surface: #eae9e9;
-  --color-text: #201e1d;
-  /* brand gold (from the TG logo) — text on it uses --color-on-accent */
-  --color-accent: #d4a03a;
-  --color-on-accent: #1c1a17;
-  --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
+  /* TG Car Vibes — silver & gold on graphite (from the logo) */
+  --color-bg: #f2f3f5;
+  --color-surface: #e6e8eb;
+  --color-text: #17181b;
+  --color-dark: #16171a; /* header, footer, ticker */
+  --color-silver: #c5c9cf;
+  --color-silver-light: #e4e6ea;
+  --color-divider: color-mix(in srgb, #17181b 30%, transparent);
 
-  --color-neutral-100: #f8f4f4;
-  --color-neutral-200: #eae7e7;
-  --color-neutral-300: #d7d3d3;
-  --color-neutral-600: #7d7979;
-  --color-neutral-700: #605d5d;
-  --color-neutral-800: #444141;
-  --color-neutral-900: #2d2b2b;
+  --color-neutral-100: #f7f8fa;
+  --color-neutral-200: #e6e8eb;
+  --color-neutral-300: #d3d6db;
+  --color-neutral-600: #7b808a;
+  --color-neutral-700: #5a5f68;
+  --color-neutral-800: #3d4148;
+  --color-neutral-900: #26282c;
 
-  --color-accent-100: #fbf1dc;
-  --color-accent-600: #c08d2a;
-  --color-accent-700: #8a6414; /* gold readable as text on light backgrounds */
-  --color-accent-800: #664a0e;
+  /* brand gold — text on it uses --color-on-accent */
+  --color-accent: #cfa044;
+  --color-on-accent: #17181b;
+  --gold-gradient: linear-gradient(135deg, #ecc96f 0%, #cf9f3e 50%, #a97a22 100%);
+  --silver-gradient: linear-gradient(135deg, #f4f5f7 0%, #c5c9cf 50%, #8f949c 100%);
+  --color-accent-100: #faf1de;
+  --color-accent-600: #b98a2c;
+  --color-accent-700: #86621a; /* gold readable as text on light backgrounds */
+  --color-accent-800: #654a12;
 
   /* warnings: overdue, expired, errors */
   --color-danger: #c4260d;
@@ -35,9 +41,9 @@
   --radius-md: 12px;
   --radius-lg: 18px;
 
-  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
-  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
-  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #26282c 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #26282c 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #26282c 22%, transparent);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -70,10 +76,10 @@ img { display: block; max-width: 100%; }
 .btn:hover { color: var(--color-text); }
 .btn svg { display: block; flex: none; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary, .btn-primary:hover { background: var(--color-accent); color: var(--color-on-accent); }
-.btn-primary:hover { background: var(--color-accent-600); }
-.btn-primary:active { background: var(--color-accent-700); }
-.btn-secondary { border-color: var(--color-divider); }
+.btn-primary, .btn-primary:hover { background: var(--gold-gradient); color: var(--color-on-accent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary:active { filter: brightness(0.94); }
+.btn-secondary { border-color: #a9aeb6; }
 .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
 .btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
 .btn-ghost, .btn-ghost:hover { color: var(--color-accent-700); padding-inline: 4px; }
@@ -116,7 +122,7 @@ img { display: block; max-width: 100%; }
 }
 .seg button + button, .seg a + a { border-left: 1px solid var(--color-divider); }
 .seg .on-dark { background: var(--color-text); color: var(--color-bg); }
-.seg .on-accent { background: var(--color-accent); color: var(--color-on-accent); }
+.seg .on-accent { background: var(--gold-gradient); color: var(--color-on-accent); }
 
 /* — key/value rows — */
 .rows { border-top: 2px solid var(--color-divider); }

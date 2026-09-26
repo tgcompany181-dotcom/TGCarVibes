@@ -1,12 +1,12 @@
 import Image from 'next/image';
 
-/** TG Car & Van Rental logo. `onDark` uses the version with light lettering. Logo files are 1150×160. */
-export function BrandLogo({ height = 40, onDark = false, priority = false }: { height?: number; onDark?: boolean; priority?: boolean }) {
+/** TG Car Vibes logo (silver & gold, transparent — works on light and dark backgrounds). File is 1072×160. */
+export function BrandLogo({ height = 40, priority = false }: { height?: number; priority?: boolean }) {
   return (
     <Image
-      src={onDark ? '/images/logo-light.png' : '/images/logo.png'}
-      alt="TG Car & Van Rental"
-      width={Math.round((height * 1150) / 160)}
+      src="/images/tg-car-vibes-logo.png"
+      alt="TG Car Vibes"
+      width={Math.round((height * 1072) / 160)}
       height={height}
       priority={priority}
       style={{ height, width: 'auto', maxWidth: '100%' }}
