@@ -158,17 +158,7 @@ function NewContractDialog({
       <div id="nc-title" className="dialog-title">
         New contract
       </div>
-      <div className="field">
-        <label htmlFor="nc-hire">Fill in from a current hire (optional)</label>
-        <select id="nc-hire" className="input" value={f.customerId} onChange={(e) => pick(e.target.value)}>
-          <option value="">— New customer / fill in manually —</option>
-          {hires.map((h) => (
-            <option key={h.customerId} value={h.customerId}>
-              {h.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CustomerSearch hires={hires} selected={f.customerId ? f : null} onPick={(h) => pick(h?.customerId ?? '')} />
       <form
         key={key}
         onSubmit={(e) => {
@@ -313,5 +303,71 @@ function ShareDialog({ token, name, mobile, rego, siteUrl, onClose }: { token: s
         </button>
       </div>
     </Dialog>
+  );
+}
+
+/** Type a name, mobile or plate to find an existing customer and prefill the contract. */
+function CustomerSearch({ hires, selected, onPick }: { hires: HireOption[]; selected: HireOption | null; onPick: (h: HireOption | null) => void }) {
+  const [q, setQ] = useState('');
+  const needle = q.trim().toLowerCase();
+  const digits = needle.replace(/\D/g, '');
+  const matches = needle
+    ? hires
+        .filter(
+          (h) =>
+            h.renterName.toLowerCase().includes(needle) ||
+            h.vehicleRego.toLowerCase().includes(needle) ||
+            (digits.length >= 3 && h.mobile.replace(/\D/g, '').includes(digits)),
+        )
+        .slice(0, 8)
+    : [];
+
+  if (selected) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--color-accent-100)', border: '1px solid var(--color-accent)', borderRadius: 12, padding: '8px 12px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700 }}>{selected.renterName}</div>
+          <div className="muted" style={{ fontSize: 13 }}>
+            {[selected.mobile, selected.vehicleRego && `${selected.vehicleRego} ${selected.vehicleDescription}`].filter(Boolean).join(' · ') || 'No current hire'}
+          </div>
+        </div>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => { onPick(null); setQ(''); }}>
+          Change
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="field" style={{ position: 'relative' }}>
+      <label htmlFor="nc-search">Existing customer (optional) — search by name, mobile or plate</label>
+      <input
+        id="nc-search"
+        className="input"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="e.g. Maika, 0413 890 435 or COG65T"
+        autoComplete="off"
+        autoFocus
+      />
+      {needle && (
+        <div style={{ border: '1px solid var(--color-divider)', borderRadius: 10, marginTop: 4, overflow: 'hidden', background: 'var(--color-bg)' }}>
+          {matches.length === 0 && <div className="muted" style={{ padding: '8px 12px', fontSize: 13 }}>No customer found — fill in the details below for a new customer.</div>}
+          {matches.map((h) => (
+            <button
+              key={h.customerId}
+              type="button"
+              onClick={() => onPick(h)}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', border: 0, borderBottom: '1px solid var(--color-neutral-200)', background: 'transparent', cursor: 'pointer', font: 'inherit' }}
+            >
+              <b>{h.renterName}</b>{' '}
+              <span className="muted" style={{ fontSize: 13 }}>
+                {[h.mobile, h.vehicleRego && `${h.vehicleRego} ${h.vehicleDescription}`].filter(Boolean).join(' · ')}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -11,26 +11,25 @@ export default async function ContractsPage() {
   const today = todaySydney();
   const ix = indexAdmin(data, today);
 
-  // customers with an active hire → prefill the new-contract form
-  const hires: HireOption[] = [...ix.activeRentalByCustomer.values()].flatMap((r) => {
-    const c = ix.customerById.get(r.customerId);
-    const car = ix.carById.get(r.carId);
-    if (!c || !car) return [];
-    return [
-      {
-        customerId: c.id,
-        label: `${c.firstName} ${c.lastName} — ${car.plate ?? ''} ${car.model} ${car.year}`.trim(),
-        renterName: `${c.firstName} ${c.lastName}`.trim(),
-        mobile: displayPhone(c.phone),
-        vehicleRego: car.plate ?? '',
-        vehicleDescription: `${car.model} ${car.year}`,
-        start: r.startDate,
-        end: addDays(r.startDate, 56),
-        weeklyRent: r.weeklyRate,
-        bond: r.bondAmount,
-      },
-    ];
+  // every customer can be picked; those with an active hire also prefill the car and rent
+  const hires: HireOption[] = data.customers.map((c) => {
+    const r = ix.activeRentalByCustomer.get(c.id);
+    const car = r ? ix.carById.get(r.carId) : undefined;
+    const name = `${c.firstName} ${c.lastName}`.trim();
+    return {
+      customerId: c.id,
+      label: car ? `${name} — ${car.plate ?? ''} ${car.model} ${car.year}`.replace(/\s+/g, ' ') : `${name} — no current hire`,
+      renterName: name,
+      mobile: displayPhone(c.phone),
+      vehicleRego: car?.plate ?? '',
+      vehicleDescription: car ? `${car.model} ${car.year}` : '',
+      start: r?.startDate ?? today,
+      end: r ? addDays(r.startDate, 56) : '',
+      weeklyRent: r?.weeklyRate ?? car?.weeklyRate ?? 0,
+      bond: r?.bondAmount ?? 0,
+    };
   });
+  hires.sort((a, b) => Number(!a.vehicleRego) - Number(!b.vehicleRego) || a.renterName.localeCompare(b.renterName));
 
   const h = await headers();
   const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'tgcarvibes.com';
