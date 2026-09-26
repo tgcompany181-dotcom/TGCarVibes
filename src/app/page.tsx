@@ -2,6 +2,7 @@ import { Car, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FleetBooking } from '@/components/site/FleetBooking';
+import { HeroCarousel } from '@/components/site/HeroCarousel';
 import { BUSINESS, telHref, waHref } from '@/lib/config';
 import { getRepo } from '@/lib/data';
 import { addDays, todaySydney } from '@/lib/dates';
@@ -29,6 +30,12 @@ export default async function HomePage() {
     groups = groupFleet(await getRepo().publicCars());
   } catch (e) {
     console.error('Failed to load fleet', e);
+  }
+  let banners: string[] = [];
+  try {
+    banners = (await getRepo().getBanners?.()) ?? [];
+  } catch (e) {
+    console.error('Failed to load cover images', e);
   }
   const defaultPick = addDays(todaySydney(), 3);
 
@@ -65,9 +72,7 @@ export default async function HomePage() {
       </div>
       <div className={s.redStrip} />
 
-      <div className={s.hero}>
-        <Image src="/images/hero-banner.jpg" alt="TG Car Vibes cars at Bankstown" fill priority sizes="100vw" />
-      </div>
+      <HeroCarousel images={banners.length ? banners : ['/images/hero-banner.jpg']} />
 
       <FleetBooking groups={groups} defaultPick={defaultPick} />
 

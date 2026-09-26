@@ -18,6 +18,12 @@
 /* hero */
 .hero { position: relative; width: 100%; aspect-ratio: 2056 / 765; min-height: 260px; background: var(--color-neutral-200); overflow: hidden; }
 .hero img { object-fit: cover; }
+.heroSlide { transition: opacity 0.9s ease; }
+.heroDots { position: absolute; left: 0; right: 0; bottom: 56px; display: flex; justify-content: center; gap: 8px; z-index: 1; }
+.heroDots button { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 2px solid #fff; background: transparent; cursor: pointer; box-shadow: var(--shadow-sm); }
+.heroDots .heroDotOn { background: #fff; }
+@media (prefers-reduced-motion: reduce) { .heroSlide { transition: none; } }
+@media (max-width: 640px) { .heroDots { bottom: 36px; } }
 
 /* booking bar */
 .bookingOuter { composes: wrap; position: relative; z-index: 2; margin-top: -40px; }

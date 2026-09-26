@@ -29,6 +29,9 @@ export interface Repo {
   /** Local/demo modes only: customer sign-in with mobile + PIN. */
   findCustomerByPhone?(phone: string): Promise<{ id: string; pinHash?: string } | null>;
   setCustomerPin?(customerId: string, pinHash: string): Promise<void>;
+  getBanners?(): Promise<string[]>;
+  addBanner?(file: File): Promise<void>;
+  setBanners?(urls: string[]): Promise<void>;
   getAdminAuth?(): Promise<{ passwordHash: string; epoch: number } | null>;
   /** Returns the new session epoch. */
   setAdminPassword?(passwordHash: string): Promise<number>;

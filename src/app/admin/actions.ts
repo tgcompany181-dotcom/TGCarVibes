@@ -237,3 +237,27 @@ export async function changeAdminPassword(_prev: PasswordState, form: FormData):
   });
   return { ok: true, message: 'Password changed. Other devices have been signed out.' };
 }
+
+// ─── cover images (home page slideshow) ────────────────────────────────────
+
+export async function addBanners(form: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.addBanner) throw new Error('Not available in this setup.');
+    const files = form.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0);
+    if (!files.length) throw new Error('Choose at least one photo');
+    for (const f of files) {
+      if (!f.type.startsWith('image/')) throw new Error(`${f.name} is not an image`);
+      if (f.size > 6 * 1024 * 1024) throw new Error(`${f.name} is over 6 MB`);
+    }
+    for (const f of files) await repo.addBanner(f);
+  });
+}
+
+export async function saveBannerOrder(urls: string[]): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.setBanners) throw new Error('Not available in this setup.');
+    await repo.setBanners(urls);
+  });
+}

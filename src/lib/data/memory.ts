@@ -9,6 +9,8 @@ export interface StoredData extends AdminData {
   pins: Record<string, string>;
   /** Admin password set from the website (overrides ADMIN_PASSWORD). `epoch` invalidates old sessions. */
   admin?: { passwordHash: string; epoch: number };
+  /** Home page cover images, in display order. */
+  banners?: string[];
 }
 
 export interface MemoryStore {
@@ -175,6 +177,24 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       const d = await store.load();
       const c = d.customers.find((x) => x.phone === phone);
       return c ? { id: c.id, pinHash: d.pins[c.id] } : null;
+    },
+
+    async getBanners() {
+      return [...((await store.load()).banners ?? [])];
+    },
+
+    async addBanner(file) {
+      const d = await store.load();
+      const url = await store.savePhoto('banner', file);
+      d.banners = [...(d.banners ?? []), url];
+      await store.save();
+    },
+
+    async setBanners(urls) {
+      const d = await store.load();
+      const current = new Set(d.banners ?? []);
+      d.banners = urls.filter((u) => current.has(u)); // only re-order / remove existing ones
+      await store.save();
     },
 
     async getAdminAuth() {
