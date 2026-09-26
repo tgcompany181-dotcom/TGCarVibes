@@ -14,5 +14,6 @@ export const getAdminData = cache(async () => {
   } catch (e) {
     console.error('generateInvoices failed', e);
   }
-  return { data: await repo.adminData(), today };
+  const [data, requests] = await Promise.all([repo.adminData(), repo.listRequests?.() ?? Promise.resolve(null)]);
+  return { data, today, requests };
 });

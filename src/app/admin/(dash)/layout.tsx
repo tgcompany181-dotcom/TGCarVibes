@@ -10,11 +10,13 @@ import { AdminNav } from './AdminNav';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { data, today } = await getAdminData();
+  const { data, today, requests } = await getAdminData();
+  const newRequests = requests?.filter((r) => r.status === 'new').length ?? 0;
   const overdue = paymentTotals(data.invoices, today).overdueCount;
   const customers = new Set(activeRentals(data.rentals, today).map((r) => r.customerId)).size;
   const tabs = [
     { href: '/admin', label: 'Overview', badge: '' },
+    ...(requests ? [{ href: '/admin/requests', label: 'Requests', badge: newRequests ? `${newRequests} new` : '' }] : []),
     { href: '/admin/fleet', label: 'Fleet', badge: String(data.cars.length) },
     { href: '/admin/customers', label: 'Customers', badge: String(customers) },
     { href: '/admin/payments', label: 'Payments', badge: overdue ? `${overdue} overdue` : '' },

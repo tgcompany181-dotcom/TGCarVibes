@@ -1,7 +1,7 @@
 import 'server-only';
 import { todaySydney } from '../dates';
 import { missingInvoiceDates } from '../derive';
-import type { AdminData, Car, Customer } from '../types';
+import type { AdminData, BookingRequest, Car, Customer } from '../types';
 import type { Repo } from './types';
 
 /** Everything the local/demo modes keep: the admin data plus hashed customer PINs. */
@@ -11,6 +11,7 @@ export interface StoredData extends AdminData {
   admin?: { passwordHash: string; epoch: number };
   /** Home page cover images, in display order. */
   banners?: string[];
+  requests?: BookingRequest[];
 }
 
 export interface MemoryStore {
@@ -19,6 +20,10 @@ export interface MemoryStore {
   load(): Promise<StoredData>;
   save(): Promise<void>;
   savePhoto(carId: string, file: File): Promise<string>;
+  /** Private files (customer ID documents). Returns the stored file name. */
+  saveDocument(file: File, ext: string): Promise<string>;
+  readDocument(name: string): Promise<Buffer | null>;
+  deleteDocument(name: string): Promise<void>;
 }
 
 const clone = <T,>(v: T): T => structuredClone(v);
@@ -194,6 +199,35 @@ export function createMemoryRepo(store: MemoryStore): Repo {
       const d = await store.load();
       const current = new Set(d.banners ?? []);
       d.banners = urls.filter((u) => current.has(u)); // only re-order / remove existing ones
+      await store.save();
+    },
+
+    async listRequests() {
+      return clone((await store.load()).requests ?? []);
+    },
+
+    async addRequest(input) {
+      const d = await store.load();
+      d.requests = [{ ...input, id: newId('q'), createdAt: new Date().toISOString(), status: 'new' as const }, ...(d.requests ?? [])].slice(0, 2000);
+      await store.save();
+    },
+
+    saveDocument: (file, ext) => store.saveDocument(file, ext),
+    readDocument: (name) => store.readDocument(name),
+
+    async deleteRequest(id) {
+      const d = await store.load();
+      const r = d.requests?.find((x) => x.id === id);
+      if (!r) throw new Error('Request not found');
+      for (const doc of r.documents ?? []) await store.deleteDocument(doc.file);
+      d.requests = d.requests!.filter((x) => x.id !== id);
+      await store.save();
+    },
+
+    async setRequestStatus(id, status) {
+      const r = (await store.load()).requests?.find((x) => x.id === id);
+      if (!r) throw new Error('Request not found');
+      r.status = status;
       await store.save();
     },
 

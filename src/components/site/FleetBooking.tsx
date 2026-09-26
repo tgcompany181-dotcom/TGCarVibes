@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useId, useMemo, useState } from 'react';
 import s from '@/app/site.module.css';
 import { Dialog } from '@/components/ui/Dialog';
+import { RequestForm } from './RequestForm';
 import { BUSINESS, CATEGORIES, telHref, waHref } from '@/lib/config';
 import { addDays, daysBetween, fmtLong, fmtShort, isISODate } from '@/lib/dates';
 import type { FleetGroup } from '@/lib/derive';
@@ -20,11 +21,16 @@ const LENGTHS: [string, number][] = [
   ['12 months', 364],
 ];
 
-export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; defaultPick: string }) {
+export function FleetBooking({ groups, defaultPick, webRequests }: { groups: FleetGroup[]; defaultPick: string; webRequests: boolean }) {
   const [pick, setPick] = useState(defaultPick);
   const [ret, setRet] = useState(addDays(defaultPick, MIN_DAYS));
   const [cat, setCat] = useState<string>('all');
-  const [booking, setBooking] = useState<FleetGroup | null>(null);
+  const [booking, setBookingState] = useState<FleetGroup | null>(null);
+  const [step, setStep] = useState<'dates' | 'details'>('dates');
+  const setBooking = (g: FleetGroup | null) => {
+    setStep('dates');
+    setBookingState(g);
+  };
   const titleId = useId();
 
   const valid = isISODate(pick) && isISODate(ret);
@@ -158,6 +164,10 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
           <div id={titleId} className={`dialog-title ${s.dialogTitle}`}>
             {booking.title}
           </div>
+          {step === 'details' ? (
+            <RequestForm car={booking} pick={pick} ret={ret} periodText={periodText} onBack={() => setStep('dates')} />
+          ) : (
+            <>
           <div className="rows">
             <div className="row"><span>Pick-up location</span><span>{BUSINESS.location}</span></div>
           </div>
@@ -192,13 +202,26 @@ export function FleetBooking({ groups, defaultPick }: { groups: FleetGroup[]; de
               : `All of these are on hire right now. ${BUSINESS.ownerName} will message you when one comes back.`}
           </div>
           <div className={s.dialogActions}>
-            <a className="btn btn-primary btn-block btn-lg" href={`${waHref}?text=${encodeURIComponent(waText(booking))}`} target="_blank" rel="noopener noreferrer">
-              {booking.available ? 'Request booking on WhatsApp' : 'Join the waitlist on WhatsApp'} <span aria-hidden>→</span>
+            {webRequests && (
+              <button type="button" className="btn btn-primary btn-block btn-lg" disabled={tooShort} onClick={() => setStep('details')}>
+                {booking.available ? 'Continue to book' : 'Join the waitlist'} <span aria-hidden>→</span>
+              </button>
+            )}
+            <a
+              className={`btn ${webRequests ? 'btn-secondary' : 'btn-primary btn-lg'} btn-block`}
+              href={`${waHref}?text=${encodeURIComponent(waText(booking))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={webRequests ? { minHeight: 44 } : undefined}
+            >
+              {webRequests ? 'Or message on WhatsApp' : booking.available ? 'Request booking on WhatsApp' : 'Join the waitlist on WhatsApp'} <span aria-hidden>→</span>
             </a>
             <a className="btn btn-secondary" href={telHref} style={{ minHeight: 44, justifyContent: 'flex-start' }}>
               Or call {BUSINESS.ownerPhone}
             </a>
           </div>
+            </>
+          )}
         </Dialog>
       )}
     </>

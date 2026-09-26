@@ -3,11 +3,14 @@ import type {
   AdminData,
   CarInput,
   CarStatus,
+  BookingRequest,
   Customer,
   CustomerData,
   ISODate,
+  NewBookingRequest,
   NewCustomerInput,
   PublicCar,
+  RequestStatus,
 } from '../types';
 
 export interface Repo {
@@ -29,6 +32,12 @@ export interface Repo {
   /** Local/demo modes only: customer sign-in with mobile + PIN. */
   findCustomerByPhone?(phone: string): Promise<{ id: string; pinHash?: string } | null>;
   setCustomerPin?(customerId: string, pinHash: string): Promise<void>;
+  listRequests?(): Promise<BookingRequest[]>;
+  addRequest?(input: NewBookingRequest): Promise<void>;
+  setRequestStatus?(id: string, status: RequestStatus): Promise<void>;
+  deleteRequest?(id: string): Promise<void>;
+  saveDocument?(file: File, ext: string): Promise<string>;
+  readDocument?(name: string): Promise<Buffer | null>;
   getBanners?(): Promise<string[]>;
   addBanner?(file: File): Promise<void>;
   setBanners?(urls: string[]): Promise<void>;

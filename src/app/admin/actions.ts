@@ -261,3 +261,23 @@ export async function saveBannerOrder(urls: string[]): Promise<ActionResult> {
     await repo.setBanners(urls);
   });
 }
+
+// ─── booking requests from the website ─────────────────────────────────────
+
+export async function setRequestStatus(id: string, status: 'new' | 'contacted' | 'closed'): Promise<ActionResult> {
+  if (!['new', 'contacted', 'closed'].includes(status)) return { ok: false, error: 'Bad status' };
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.setRequestStatus) throw new Error('Not available in this setup.');
+    await repo.setRequestStatus(id, status);
+  });
+}
+
+/** Deletes a request and its uploaded documents. */
+export async function deleteRequest(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const repo = getRepo();
+    if (!repo.deleteRequest) throw new Error('Not available in this setup.');
+    await repo.deleteRequest(id);
+  });
+}

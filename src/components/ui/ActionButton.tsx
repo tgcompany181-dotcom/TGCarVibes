@@ -9,11 +9,14 @@ export function ActionButton({
   action,
   success,
   className = 'btn btn-primary btn-sm',
+  confirmText,
   children,
 }: {
   action: () => Promise<ActionResult>;
   success?: string;
   className?: string;
+  /** Ask before running (for destructive actions). */
+  confirmText?: string;
   children: React.ReactNode;
 }) {
   const flash = useToast();
@@ -24,6 +27,7 @@ export function ActionButton({
       className={className}
       disabled={pending}
       onClick={() =>
+        (!confirmText || window.confirm(confirmText)) &&
         start(async () => {
           const res = await action();
           if (!res.ok) flash(res.error);

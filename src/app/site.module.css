@@ -178,3 +178,25 @@
 @media (max-width: 420px) {
   .bookingGrid { grid-template-columns: 1fr; }
 }
+
+/* booking request form (dialog step 2) */
+.requestForm { display: flex; flex-direction: column; gap: 12px; }
+.requestSummary { font-size: 13px; font-weight: 600; background: var(--color-bg); border-radius: var(--radius-md); padding: 8px 12px; }
+.choiceSet { border: 0; padding: 0; margin: 0; }
+.choiceSet legend { font-size: 12px; color: color-mix(in srgb, var(--color-text) 70%, transparent); margin-bottom: 6px; padding: 0; }
+.choiceRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.choiceRow label {
+  display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; cursor: pointer;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md); background: var(--color-bg); font-weight: 600;
+}
+.choiceRow label:hover { border-color: var(--color-accent); }
+.choiceRow input { accent-color: var(--color-accent); width: 18px; height: 18px; margin: 0; }
+.choiceRow .choiceOn { border: 2px solid var(--color-accent); background: var(--color-accent-100); }
+.sentBox { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 8px 0; }
+.sentTick { width: 56px; height: 56px; border-radius: 50%; background: var(--color-accent); color: var(--color-bg); display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+
+.docList { display: flex; flex-direction: column; gap: 8px; }
+.docSlot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px dashed var(--color-divider); border-radius: var(--radius-md); background: var(--color-bg); }
+.docSlot label { cursor: pointer; flex: none; }
+.docDone { border-style: solid; border-color: var(--color-accent); background: var(--color-accent-100); }
+.docHint { font-size: 12px; color: var(--color-neutral-700); overflow-wrap: anywhere; }

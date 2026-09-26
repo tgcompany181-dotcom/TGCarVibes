@@ -1,5 +1,6 @@
 import 'server-only';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createMemoryRepo, type StoredData } from './memory';
 
@@ -12,6 +13,9 @@ import { createMemoryRepo, type StoredData } from './memory';
 export const dataDir = () => path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'));
 const dbFile = () => path.join(dataDir(), 'db.json');
 export const photoDir = () => path.join(dataDir(), 'photos');
+/** Customer ID documents — never served publicly. */
+const docDir = () => path.join(dataDir(), 'documents');
+const safeDocName = (name: string) => (/^[a-f0-9-]{36}\.(jpg|png|webp|pdf)$/.test(name) ? name : null);
 
 const empty = (): StoredData => ({ cars: [], customers: [], rentals: [], invoices: [], pins: {} });
 
@@ -55,5 +59,24 @@ export const localRepo = createMemoryRepo({
     const name = `${carId.replace(/[^a-z0-9]/gi, '')}-${Date.now()}.${ext}`;
     await writeFile(path.join(photoDir(), name), Buffer.from(await file.arrayBuffer()));
     return `/photos/${name}`;
+  },
+  async saveDocument(file, ext) {
+    await mkdir(docDir(), { recursive: true, mode: 0o700 });
+    const name = `${randomUUID()}.${ext}`;
+    await writeFile(path.join(docDir(), name), Buffer.from(await file.arrayBuffer()), { mode: 0o600 });
+    return name;
+  },
+  async readDocument(name) {
+    const safe = safeDocName(name);
+    if (!safe) return null;
+    try {
+      return await readFile(path.join(docDir(), safe));
+    } catch {
+      return null;
+    }
+  },
+  async deleteDocument(name) {
+    const safe = safeDocName(name);
+    if (safe) await rm(path.join(docDir(), safe), { force: true });
   },
 });

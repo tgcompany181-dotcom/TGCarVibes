@@ -10,7 +10,8 @@ import { markPaid } from '../actions';
 import s from '../admin.module.css';
 
 export default async function Overview() {
-  const { data, today } = await getAdminData();
+  const { data, today, requests } = await getAdminData();
+  const newRequests = requests?.filter((r) => r.status === 'new').length ?? 0;
   const count = (st: string) => data.cars.filter((c) => c.status === st).length;
   const pay = paymentTotals(data.invoices, today);
   const comp = complianceItems(data.cars, today);
@@ -28,6 +29,11 @@ export default async function Overview() {
   return (
     <>
       <h2 style={{ margin: '0 0 20px' }}>Overview</h2>
+      {newRequests > 0 && (
+        <Link href="/admin/requests" className={s.newRequestsBanner}>
+          <b>{newRequests === 1 ? '1 new booking request' : `${newRequests} new booking requests`}</b> from the website — view and call back →
+        </Link>
+      )}
       <div className={s.kpis}>
         {kpis.map((k) => (
           <div key={k.label} className={s.kpi}>

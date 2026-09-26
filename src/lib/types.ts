@@ -99,3 +99,26 @@ export interface NewCustomerInput {
   startDate: ISODate;
   weeklyRate: number;
 }
+
+export type RequestStatus = 'new' | 'contacted' | 'closed';
+
+/** Booking request sent from the public website. */
+export interface BookingRequest {
+  id: string;
+  createdAt: string; // ISO timestamp
+  status: RequestStatus;
+  car: string; // e.g. "Honda Civic 2007"
+  weeklyRate: number;
+  pickDate: ISODate;
+  returnDate: ISODate;
+  name: string;
+  phone: string; // as typed by the customer
+  /** Answers to BOOKING_QUESTIONS, stored with the question text so old requests stay readable. */
+  answers: { question: string; answer: string }[];
+  message: string;
+  waitlist: boolean;
+  /** Uploaded ID documents (private files, admin only). */
+  documents?: { kind: string; label: string; file: string }[];
+}
+
+export type NewBookingRequest = Omit<BookingRequest, 'id' | 'createdAt' | 'status'>;

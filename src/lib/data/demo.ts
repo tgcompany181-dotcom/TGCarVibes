@@ -1,4 +1,5 @@
 import 'server-only';
+import { randomUUID } from 'node:crypto';
 import { addDays, todaySydney } from '../dates';
 import { FLEET_SEED } from '../fleet-seed';
 import { toIntlPhone } from '../format';
@@ -99,7 +100,8 @@ function seed(today: string): AdminData {
   return { cars, customers, rentals, invoices };
 }
 
-const g = globalThis as unknown as { __tgDemo?: StoredData };
+const g = globalThis as unknown as { __tgDemo?: StoredData; __tgDemoDocs?: Map<string, Buffer> };
+const demoDocs = (g.__tgDemoDocs ??= new Map());
 const db = () => (g.__tgDemo ??= { ...seed(todaySydney()), pins: { d0: hashPin(DEMO_OTP) } });
 
 export const demoRepo = createMemoryRepo({
@@ -110,4 +112,11 @@ export const demoRepo = createMemoryRepo({
     const buf = Buffer.from(await file.arrayBuffer());
     return `data:${file.type || 'image/jpeg'};base64,${buf.toString('base64')}`;
   },
+  async saveDocument(file, ext) {
+    const name = `${randomUUID()}.${ext}`;
+    demoDocs.set(name, Buffer.from(await file.arrayBuffer()));
+    return name;
+  },
+  readDocument: async (name) => demoDocs.get(name) ?? null,
+  deleteDocument: async (name) => void demoDocs.delete(name),
 });

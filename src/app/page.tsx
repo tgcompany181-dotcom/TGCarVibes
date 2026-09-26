@@ -74,7 +74,7 @@ export default async function HomePage() {
 
       <HeroCarousel images={banners.length ? banners : ['/images/hero-banner.jpg']} />
 
-      <FleetBooking groups={groups} defaultPick={defaultPick} />
+      <FleetBooking groups={groups} defaultPick={defaultPick} webRequests={Boolean(getRepo().addRequest)} />
 
       <section className={s.benefits}>
         <div className={s.benefitGrid}>
