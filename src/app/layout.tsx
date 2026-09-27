@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Kaushan_Script } from 'next/font/google';
 import './globals.css';
+import GoogleAnalytics from '@/components/site/GoogleAnalytics';
 
 const archivo = Archivo({ subsets: ['latin'], weight: ['400', '600', '800'], variable: '--font-archivo', display: 'swap' });
 const kaushan = Kaushan_Script({ subsets: ['latin'], weight: '400', variable: '--font-kaushan', display: 'swap' });
@@ -16,7 +17,10 @@ export const viewport: Viewport = { themeColor: '#f3f2f2', width: 'device-width'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={`${archivo.variable} ${kaushan.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }
